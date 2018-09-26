@@ -63,3 +63,10 @@ func Reply(){
 	fmt.Println("handle success")
 }
 ```
+
+result:
+```
+G:/go_workspace/GOPATH/src/errorX/example/main.go: 27 | connect to mysql time out
+G:/go_workspace/GOPATH/src/errorX/example/main.go: 35 | connect to mysql time out
+G:/go_workspace/GOPATH/src/errorX/example/main.go: 43 | inner service error,please call admin for help
+```
