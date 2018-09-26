@@ -1,16 +1,3 @@
-a very convenient error handler.
-## What is different from the officials
-| property | info | example | error | errorx |
-|:----------- | :---- |:------|:-------------:|--:|
-| Error() | what the error really is  | password wrong | yes | yes |
-| StackTrace() | where the error went through| file.go :32 password wrong| no | yes |
-| ReGen() | covering the real cause and return new error|  real_cause: time out -> user_view:inner service error | no | yes|
-
-## start
-`go get github.com/fwhezfwhez/errorx`
-
-## Example
-```go
 package main
 
 import (
@@ -62,4 +49,3 @@ func Control() error {
 func Reply(){
 	fmt.Println("handle success")
 }
-```
