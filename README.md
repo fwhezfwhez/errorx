@@ -17,13 +17,12 @@ import (
 	"github.com/fwhezfwhez/errorx"
 	"errors"
 	"fmt"
-	"log"
 )
 
 func main() {
 	if e := Control(); e != nil {
-		//e.(errorx.Error).PrintStackTrace()
-		log.Println(e.(errorx.Error).StackTrace())
+		e.(errorx.Error).PrintStackTrace()
+		//log.Println(e.(errorx.Error).StackTrace())
 	} else {
 		Reply()
 	}
@@ -66,7 +65,9 @@ func Reply(){
 
 result:
 ```
-G:/go_workspace/GOPATH/src/errorX/example/main.go: 27 | connect to mysql time out
-G:/go_workspace/GOPATH/src/errorX/example/main.go: 35 | connect to mysql time out
-G:/go_workspace/GOPATH/src/errorX/example/main.go: 43 | inner service error,please call admin for help
+StackTrace | CausedBy
+G:/go_workspace/GOPATH/src/errorX/example/main.go: 26 | connect to mysql time out
+G:/go_workspace/GOPATH/src/errorX/example/main.go: 34 | connect to mysql time out
+G:/go_workspace/GOPATH/src/errorX/example/main.go: 42 | inner service error,please call admin for help
+
 ```

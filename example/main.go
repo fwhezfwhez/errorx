@@ -1,16 +1,15 @@
 package main
 
 import (
-	"github.com/fwhezfwhez/errorx"
 	"errors"
 	"fmt"
-	"log"
+	"github.com/fwhezfwhez/errorx"
 )
 
 func main() {
 	if e := Control(); e != nil {
-		//e.(errorx.Error).PrintStackTrace()
-		log.Println(e.(errorx.Error).StackTrace())
+		e.(errorx.Error).PrintStackTrace()
+		// log.Println(e.(errorx.Error).StackTrace())
 	} else {
 		Reply()
 	}
