@@ -140,3 +140,9 @@ func TestMustWrap(t *testing.T) {
 	//}
 	//fmt.Println(e)
 }
+
+//test flagFormat
+func TestPrintStackFormat(t *testing.T) {
+	rs := PrintStackFormat(LdateTime | LcauseBy| Llongfile, "main.go", 12, "an error happen")
+	fmt.Println(rs)
+}
