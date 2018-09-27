@@ -4,6 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"runtime"
+	"strings"
+	"time"
+)
+
+const(
+	LcauseBy = 1 <<iota
+	LdateTime
+	Llongfile
 )
 
 // an Error instance wraps an official error and storage its stackTrace.
@@ -25,6 +33,8 @@ type Error struct {
 	// upper
 	ReGenerated bool
 	Errors      []error
+	Flag  int
+
 }
 
 func Empty() Error {
@@ -33,6 +43,7 @@ func Empty() Error {
 		StackTraces: make([]string, 0, 30),
 		ReGenerated: false,
 		Errors:      make([]error, 0, 30),
+		Flag:        Llongfile | LcauseBy | LdateTime,
 	}
 }
 
@@ -54,17 +65,16 @@ func New(e error) error {
 	switch v := e.(type) {
 	case Error:
 		_, file, line, _ := runtime.Caller(1)
-		v.StackTraces = append(v.StackTraces, fmt.Sprintf("%s: %d | %s", file, line, e.Error()))
+		trace := PrintStackFormat(v.Flag, file, line , v.Error())
+		v.StackTraces = append(v.StackTraces, trace)
 		return v
 	case error:
-		errorX := Error{
-			E:           e,
-			StackTraces: make([]string, 0, 30),
-			Errors:      append(make([]error, 0, 30), e),
-			ReGenerated: false,
-		}
+		errorX := Empty()
+		errorX.E = e
+		errorX.Errors = append(errorX.Errors,e)
 		_, file, line, _ := runtime.Caller(1)
-		errorX.StackTraces = append(errorX.StackTraces, fmt.Sprintf("%s: %d | %s", file, line, e.Error()))
+		trace := PrintStackFormat(Llongfile | LcauseBy| LdateTime, file, line , v.Error())
+		errorX.StackTraces = append(errorX.StackTraces, trace)
 		return errorX
 	}
 	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
@@ -72,8 +82,21 @@ func New(e error) error {
 }
 
 // print error stack trace
+// e.Flag only controls 'Error' type or official error which has been wrapped to 'Error'.
+// e.Flag only controls stack trace inner an Error type ,rather than some stack trace which has been init by api NewFromStackTrace([]string,string)
 func (e Error) PrintStackTrace() {
-	fmt.Println(fmt.Sprintf("%s | %s", "StackTrace", "CausedBy"))
+	header := make([]string,0, 10)
+	if e.Flag & LdateTime >0 {
+		header = append(header, "HappenAt")
+	}
+	if e.Flag & Llongfile >0 {
+		header = append(header, "StackTrace")
+	}
+	if e.Flag & LcauseBy >0 {
+		header = append(header, "CauseBy")
+	}
+	fmt.Println(strings.Join(header, " | "))
+
 	for _, v := range e.StackTraces {
 		fmt.Println(v)
 	}
@@ -86,17 +109,16 @@ func Wrap(e error) error {
 	switch v := e.(type) {
 	case Error:
 		_, file, line, _ := runtime.Caller(1)
-		v.StackTraces = append(v.StackTraces, fmt.Sprintf("%s: %d | %s", file, line, e.Error()))
+		trace := PrintStackFormat(v.Flag, file, line , v.Error())
+		v.StackTraces = append(v.StackTraces, trace)
 		return v
 	case error:
-		errorX := Error{
-			E:           e,
-			StackTraces: make([]string, 0, 30),
-			Errors:      append(make([]error, 0, 30), e),
-			ReGenerated: false,
-		}
+		errorX := Empty()
+		errorX.E = e
+		errorX.Errors = append(errorX.Errors,e)
 		_, file, line, _ := runtime.Caller(1)
-		errorX.StackTraces = append(errorX.StackTraces, fmt.Sprintf("%s: %d | %s", file, line, e.Error()))
+		trace := PrintStackFormat(LdateTime | Llongfile | LcauseBy, file, line , v.Error())
+		errorX.StackTraces = append(errorX.StackTraces, trace)
 		return errorX
 	}
 	return Wrap(errors.New("invalid error type,error type should be official or errorx.Error"))
@@ -108,17 +130,16 @@ func NewFromString(msg string) error {
 	switch v := e.(type) {
 	case Error:
 		_, file, line, _ := runtime.Caller(1)
-		v.StackTraces = append(v.StackTraces, fmt.Sprintf("%s: %d | %s", file, line, e.Error()))
+		trace := PrintStackFormat(v.Flag, file, line , v.Error())
+		v.StackTraces = append(v.StackTraces, trace)
 		return v
 	case error:
-		errorX := Error{
-			E:           e,
-			StackTraces: make([]string, 0, 30),
-			Errors:      append(make([]error, 0, 30), e),
-			ReGenerated: false,
-		}
+		errorX := Empty()
+		errorX.E = e
+		errorX.Errors = append(errorX.Errors,e)
 		_, file, line, _ := runtime.Caller(1)
-		errorX.StackTraces = append(errorX.StackTraces, fmt.Sprintf("%s: %d | %s", file, line, e.Error()))
+		trace := PrintStackFormat(Llongfile | LcauseBy| LdateTime, file, line , v.Error())
+		errorX.StackTraces = append(errorX.StackTraces, trace)
 		return errorX
 	}
 	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
@@ -127,38 +148,33 @@ func NewFromString(msg string) error {
 // new an error with existed stacktrace and generate the new error with new msg
 func NewFromStackTrace(stackTrace []string, msg string) error {
 	e := errors.New(msg)
-	v := Error{
-		E:           e,
-		StackTraces: stackTrace,
-		Errors:      append(make([]error, 0, 30), e),
-		ReGenerated: false,
-	}
+	v := Empty()
+	v.E = e
+	v.StackTraces = stackTrace
+	v.Errors = append(v.Errors,e)
 	_, file, line, _ := runtime.Caller(1)
-	trace := fmt.Sprintf("%s: %d | %s", file, line, e.Error())
+	trace := PrintStackFormat(v.Flag, file, line , v.Error())
 	v.StackTraces = append(v.StackTraces, trace)
 	return v
 }
 
 // ReGenerate a new error and save the old
 func ReGen(old error, new error) error {
-	e := Error{
-		E:           old,
-		StackTraces: make([]string, 0, 30),
-		Errors:      make([]error, 0, 30),
-		ReGenerated: true,
-	}
+	e := Empty()
+	e.E = old
+	e.ReGenerated = true
 
 	switch o := old.(type) {
 	case Error:
 		e = o
 		e.ReGenerated = true
 		_, file, line, _ := runtime.Caller(1)
-		trace := fmt.Sprintf("%s: %d | %s", file, line, new.Error())
+		trace := PrintStackFormat(e.Flag, file, line , new.Error())
 		e.StackTraces = append(e.StackTraces, trace)
 		e.Errors = append(e.Errors, old, new)
 	case error:
 		_, file, line, _ := runtime.Caller(1)
-		trace := fmt.Sprintf("%s: %d | %s", file, line, new.Error())
+		trace := PrintStackFormat(e.Flag, file, line , new.Error())
 		e.StackTraces = append(e.StackTraces, trace)
 		e.Errors = append(e.Errors, old, new)
 	}
@@ -174,4 +190,23 @@ func MustWrap(e error) Error {
 		return New(v).(Error)
 	}
 	return Empty()
+}
+
+func PrintStackFormat(flag int,file string,line int ,cause string) string {
+	var formatGroup = make([]string,0,3)
+	var formatArgs = make([]interface{}, 0, 3)
+	if flag & LdateTime > 0 {
+		formatGroup = append(formatGroup, "%s")
+		formatArgs = append(formatArgs, time.Now().Format("2006-01-02 15:04:05"))
+	}
+	if flag & Llongfile >0 {
+		formatGroup = append(formatGroup,"%s")
+		trace := fmt.Sprintf("%s: %d", file, line)
+		formatArgs = append(formatArgs, trace)
+	}
+	if flag & LcauseBy >0 {
+		formatGroup = append(formatGroup,"%s")
+		formatArgs = append(formatArgs, cause)
+	}
+	return  fmt.Sprintf(strings.Join(formatGroup," | "), formatArgs...)
 }

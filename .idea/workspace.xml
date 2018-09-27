@@ -11,7 +11,9 @@
       <change beforePath="$PROJECT_DIR$/../Pay" beforeDir="false" afterPath="$PROJECT_DIR$/../Pay" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../PrintControler" beforeDir="false" afterPath="$PROJECT_DIR$/../PrintControler" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Queue" beforeDir="false" afterPath="$PROJECT_DIR$/../Queue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/errorx.go" beforeDir="false" afterPath="$PROJECT_DIR$/errorx.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/errorx_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/errorx_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../github.com/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../github.com/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../github.com/BurntSushi/toml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../github.com/fwhezfwhez/go-BinaryTree" beforeDir="false" afterPath="$PROJECT_DIR$/../github.com/fwhezfwhez/go-BinaryTree" afterDir="false" />
@@ -57,28 +59,28 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="go" value="4754" />
+          <entry key="go" value="6500" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Go" value="4754" />
+          <entry key="Go" value="6500" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.go.postfix.template.usages.trigger">
         <counts>
-          <entry key=".append" value="7" />
+          <entry key=".append" value="9" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="go" value="4" />
+          <entry key="go" value="8" />
           <entry key="md" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Go" value="4" />
+          <entry key="Go" value="8" />
           <entry key="PLAIN_TEXT" value="1" />
         </counts>
       </usages-collector>
@@ -89,18 +91,24 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/errorx.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="875">
-              <caret line="175" column="18" lean-forward="true" selection-start-line="175" selection-start-column="18" selection-end-line="175" selection-end-column="18" />
+            <state relative-caret-position="231">
+              <caret line="87" column="23" selection-start-line="87" selection-start-column="23" selection-end-line="87" selection-end-column="23" />
               <folding>
                 <element signature="e#16#44#0" expanded="true" />
+                <element signature="e#56#128#0" />
                 <element signature="n#!!block;n#Error#0" />
                 <element signature="n#!!block;n#StackTrace#0" />
-                <element signature="n#!!block;n#PrintStackTrace#0" />
-                <element signature="n#!!block;n#Wrap#0" />
-                <element signature="n#!!block;n#NewFromString#0" />
-                <element signature="n#!!block;n#NewFromStackTrace#0" />
-                <element signature="n#!!block;n#ReGen#0" />
+                <element signature="e#1549#1588#0" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://E:/go_1.11/src/log/log.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="189">
+              <caret line="160" column="24" lean-forward="true" selection-start-line="160" selection-start-column="24" selection-end-line="160" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -114,25 +122,29 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/errorx_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1690">
-              <caret line="141" column="1" selection-start-line="141" selection-start-column="1" selection-end-line="141" selection-end-column="1" />
+            <state relative-caret-position="104">
+              <caret line="29" column="5" lean-forward="true" selection-start-line="29" selection-start-column="5" selection-end-line="29" selection-end-column="5" />
               <folding>
-                <element signature="n#!!block;n#TestNew#0" />
                 <element signature="n#!!block;n#TestNewFromString#0" />
                 <element signature="n#!!block;n#TestNewFromStackTrace#0" />
+                <element signature="n#!!block;n#TestReGen#0" />
+                <element signature="n#!!block;n#TestPrintStackFormat#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/example/main.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="100">
-              <caret line="5" column="9" lean-forward="true" selection-start-line="5" selection-start-column="9" selection-end-line="5" selection-end-column="9" />
+              <caret line="10" column="39" selection-start-line="10" selection-start-column="39" selection-end-line="10" selection-end-column="39" />
+              <folding>
+                <element signature="e#14#58#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -178,10 +190,10 @@
       <list>
         <option value="$PROJECT_DIR$/error.go" />
         <option value="$PROJECT_DIR$/error_test.go" />
-        <option value="$PROJECT_DIR$/errorx.go" />
-        <option value="$PROJECT_DIR$/errorx_test.go" />
-        <option value="$PROJECT_DIR$/example/main.go" />
         <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/example/main.go" />
+        <option value="$PROJECT_DIR$/errorx_test.go" />
+        <option value="$PROJECT_DIR$/errorx.go" />
       </list>
     </option>
   </component>
@@ -243,17 +255,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Build.go build main.go">
-    <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
-      <module name="errorX" />
-      <working_directory value="$PROJECT_DIR$/" />
-      <kind value="FILE" />
-      <filePath value="$PROJECT_DIR$/example/main.go" />
-      <package value="errorX" />
-      <directory value="$PROJECT_DIR$/" />
-      <method v="2" />
-    </configuration>
-    <configuration name="TestMustWrap in errorX" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Go Test.TestNew in errorX">
+    <configuration name="TestNew in errorX" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="errorX" />
       <working_directory value="$PROJECT_DIR$" />
       <framework value="gotest" />
@@ -261,7 +264,7 @@
       <package value="errorX" />
       <directory value="$PROJECT_DIR$/" />
       <filePath value="$PROJECT_DIR$/" />
-      <pattern value="^TestMustWrap$" />
+      <pattern value="^TestNew$" />
       <method v="2" />
     </configuration>
     <configuration name="TestNewFromStackTrace in errorX" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
@@ -275,6 +278,28 @@
       <pattern value="^TestNewFromStackTrace$" />
       <method v="2" />
     </configuration>
+    <configuration name="TestNewFromString in errorX" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="errorX" />
+      <working_directory value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="errorX" />
+      <directory value="$PROJECT_DIR$/" />
+      <filePath value="$PROJECT_DIR$/" />
+      <pattern value="^TestNewFromString$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestPrintStackFormat in errorX" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="errorX" />
+      <working_directory value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="errorX" />
+      <directory value="$PROJECT_DIR$/" />
+      <filePath value="$PROJECT_DIR$/" />
+      <pattern value="^TestPrintStackFormat$" />
+      <method v="2" />
+    </configuration>
     <configuration name="TestReGen in errorX" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="errorX" />
       <working_directory value="$PROJECT_DIR$" />
@@ -286,63 +311,53 @@
       <pattern value="^TestReGen$" />
       <method v="2" />
     </configuration>
-    <configuration name="go test errorX" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="errorX" />
-      <working_directory value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <kind value="PACKAGE" />
-      <package value="errorX" />
-      <directory value="$PROJECT_DIR$/" />
-      <filePath value="$PROJECT_DIR$/" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Go Test.TestReGen in errorX" />
+      <item itemvalue="Go Test.TestPrintStackFormat in errorX" />
+      <item itemvalue="Go Test.TestNew in errorX" />
+      <item itemvalue="Go Test.TestNewFromString in errorX" />
       <item itemvalue="Go Test.TestNewFromStackTrace in errorX" />
-      <item itemvalue="Go Test.TestMustWrap in errorX" />
-      <item itemvalue="Go Build.go build main.go" />
-      <item itemvalue="Go Test.go test errorX" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build main.go" />
-        <item itemvalue="Go Test.go test errorX" />
-        <item itemvalue="Go Test.TestMustWrap in errorX" />
+        <item itemvalue="Go Test.TestNew in errorX" />
+        <item itemvalue="Go Test.TestPrintStackFormat in errorX" />
         <item itemvalue="Go Test.TestReGen in errorX" />
+        <item itemvalue="Go Test.TestNewFromString in errorX" />
         <item itemvalue="Go Test.TestNewFromStackTrace in errorX" />
       </list>
     </recent_temporary>
   </component>
   <component name="TestHistory">
-    <history-entry file="TestMustWrap_in_errorX - 2018.09.26 at 14h 13m 04s.xml">
-      <configuration name="TestMustWrap in errorX" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestPrintStackFormat_in_errorX - 2018.09.27 at 10h 41m 24s.xml">
+      <configuration name="TestPrintStackFormat in errorX" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestMustWrap_in_errorX - 2018.09.26 at 14h 13m 15s.xml">
-      <configuration name="TestMustWrap in errorX" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestReGen_in_errorX - 2018.09.27 at 10h 52m 21s.xml">
+      <configuration name="TestReGen in errorX" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestMustWrap_in_errorX - 2018.09.26 at 14h 13m 23s.xml">
-      <configuration name="TestMustWrap in errorX" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNew_in_errorX - 2018.09.27 at 10h 56m 14s.xml">
+      <configuration name="TestNew in errorX" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestMustWrap_in_errorX - 2018.09.26 at 14h 14m 59s.xml">
-      <configuration name="TestMustWrap in errorX" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNewFromString_in_errorX - 2018.09.27 at 10h 56m 22s.xml">
+      <configuration name="TestNewFromString in errorX" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestMustWrap_in_errorX - 2018.09.26 at 14h 21m 22s.xml">
-      <configuration name="TestMustWrap in errorX" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNewFromStackTrace_in_errorX - 2018.09.27 at 10h 56m 29s.xml">
+      <configuration name="TestNewFromStackTrace in errorX" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestMustWrap_in_errorX - 2018.09.26 at 14h 24m 15s.xml">
-      <configuration name="TestMustWrap in errorX" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNewFromStackTrace_in_errorX - 2018.09.27 at 10h 56m 38s.xml">
+      <configuration name="TestNewFromStackTrace in errorX" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestMustWrap_in_errorX - 2018.09.26 at 14h 24m 57s.xml">
-      <configuration name="TestMustWrap in errorX" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNewFromString_in_errorX - 2018.09.27 at 10h 56m 43s.xml">
+      <configuration name="TestNewFromString in errorX" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestMustWrap_in_errorX - 2018.09.26 at 14h 25m 24s.xml">
-      <configuration name="TestMustWrap in errorX" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestReGen_in_errorX - 2018.09.27 at 10h 56m 53s.xml">
+      <configuration name="TestReGen in errorX" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestMustWrap_in_errorX - 2018.09.26 at 14h 29m 30s.xml">
-      <configuration name="TestMustWrap in errorX" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestPrintStackFormat_in_errorX - 2018.09.27 at 10h 57m 10s.xml">
+      <configuration name="TestPrintStackFormat in errorX" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_errorX - 2018.09.26 at 15h 40m 44s.xml">
-      <configuration name="go test errorX" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNew_in_errorX - 2018.09.27 at 14h 34m 39s.xml">
+      <configuration name="TestNew in errorX" configurationId="GoTestRunConfiguration" />
     </history-entry>
   </component>
   <component name="ToolWindowManager">
@@ -380,13 +395,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/errorx.go</url>
-          <line>53</line>
+          <line>64</line>
           <properties />
           <option name="timeStamp" value="6" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/errorx.go</url>
-          <line>169</line>
+          <line>185</line>
           <properties />
           <option name="timeStamp" value="7" />
         </line-breakpoint>
@@ -412,13 +427,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://E:/go_1.11/src/errors/errors.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="208">
-          <caret line="8" column="5" selection-start-line="8" selection-start-column="5" selection-end-line="8" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://E:/go_1.11/src/fmt/print.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="245">
@@ -440,39 +448,54 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/example/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="100">
+          <caret line="10" column="39" selection-start-line="10" selection-start-column="39" selection-end-line="10" selection-end-column="39" />
+          <folding>
+            <element signature="e#14#58#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/go_1.11/src/log/log.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="160" column="24" lean-forward="true" selection-start-line="160" selection-start-column="24" selection-end-line="160" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/go_1.11/src/errors/errors.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="208">
+          <caret line="8" column="5" selection-start-line="8" selection-start-column="5" selection-end-line="8" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/errorx.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="875">
-          <caret line="175" column="18" lean-forward="true" selection-start-line="175" selection-start-column="18" selection-end-line="175" selection-end-column="18" />
+        <state relative-caret-position="231">
+          <caret line="87" column="23" selection-start-line="87" selection-start-column="23" selection-end-line="87" selection-end-column="23" />
           <folding>
             <element signature="e#16#44#0" expanded="true" />
+            <element signature="e#56#128#0" />
             <element signature="n#!!block;n#Error#0" />
             <element signature="n#!!block;n#StackTrace#0" />
-            <element signature="n#!!block;n#PrintStackTrace#0" />
-            <element signature="n#!!block;n#Wrap#0" />
-            <element signature="n#!!block;n#NewFromString#0" />
-            <element signature="n#!!block;n#NewFromStackTrace#0" />
-            <element signature="n#!!block;n#ReGen#0" />
+            <element signature="e#1549#1588#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/errorx_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1690">
-          <caret line="141" column="1" selection-start-line="141" selection-start-column="1" selection-end-line="141" selection-end-column="1" />
+        <state relative-caret-position="104">
+          <caret line="29" column="5" lean-forward="true" selection-start-line="29" selection-start-column="5" selection-end-line="29" selection-end-column="5" />
           <folding>
-            <element signature="n#!!block;n#TestNew#0" />
             <element signature="n#!!block;n#TestNewFromString#0" />
             <element signature="n#!!block;n#TestNewFromStackTrace#0" />
+            <element signature="n#!!block;n#TestReGen#0" />
+            <element signature="n#!!block;n#TestPrintStackFormat#0" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/example/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="100">
-          <caret line="5" column="9" lean-forward="true" selection-start-line="5" selection-start-column="9" selection-end-line="5" selection-end-column="9" />
         </state>
       </provider>
     </entry>
