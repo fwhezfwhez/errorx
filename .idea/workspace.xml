@@ -3,9 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="4c0ccaa3-9a2f-49f9-ad3b-5ff51f6f98ae" name="Default" comment="">
       <change afterPath="$PROJECT_DIR$/../RoutineHelper/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BTree" beforeDir="false" afterPath="$PROJECT_DIR$/../BTree" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BeanFactory" beforeDir="false" afterPath="$PROJECT_DIR$/../BeanFactory" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BigPlate" beforeDir="false" afterPath="$PROJECT_DIR$/../BigPlate" afterDir="false" />
@@ -14,7 +11,6 @@
       <change beforePath="$PROJECT_DIR$/../Pay" beforeDir="false" afterPath="$PROJECT_DIR$/../Pay" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../PrintControler" beforeDir="false" afterPath="$PROJECT_DIR$/../PrintControler" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Queue" beforeDir="false" afterPath="$PROJECT_DIR$/../Queue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../github.com/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../github.com/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../github.com/BurntSushi/toml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../github.com/fwhezfwhez/go-BinaryTree" beforeDir="false" afterPath="$PROJECT_DIR$/../github.com/fwhezfwhez/go-BinaryTree" afterDir="false" />
@@ -52,7 +48,7 @@
     <session id="1439580491">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="2" />
+          <entry key="project.closed" value="3" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.1" value="1" />
           <entry key="project.open.time.4" value="1" />
@@ -366,7 +362,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32899022" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32899022" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3995657" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
