@@ -1,3 +1,6 @@
+# errorx
+[![Godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/fwhezfwhez/errorx)
+
 a very convenient error handler.
 ## What is different from the officials
 | property | info | example | error | errorx |
