@@ -4,18 +4,26 @@ import (
 	"fmt"
 	"github.com/fwhezfwhez/errorx"
 	"log"
+	"runtime"
+	"strconv"
+	"sync"
 	"testing"
 	"time"
 )
+var ec *ErrorCollection
+func Init(){
+	ec  = NewCollection()
+	ec.Add(errorx.NewFromString("an error happens"))
+	ec.Add(errorx.NewFromString("another error happens"))
+	ec.AddHandler(LogEr())
+	ec.HandleChain()
+}
 
 // Test handle()
 func TestErrorCollection_Handle(t *testing.T) {
-	ec := NewCollection()
-
+	Init()
 	//prepare 2 errors
-	ec.Add(errorx.NewFromString("an error happens"))
-	ec.Add(errorx.NewFromString("another error happens"))
-	ec.Handle(LogEr())
+	runtime.Gosched()
 	time.Sleep(3 * time.Second)
 	// add an error when routine on
 	ec.Add(errorx.NewFromString("after 3s, happen an error"))
@@ -23,6 +31,24 @@ func TestErrorCollection_Handle(t *testing.T) {
 	ec.CloseHandles()
 
 	time.Sleep(10 * time.Second)
+}
+
+func TestHandle(t *testing.T){
+	Init()
+	time.Sleep(2*time.Second)
+	wg := sync.WaitGroup{}
+	wg.Add(10)
+	for i:=0;i<10;i++{
+		go func(a int,group *sync.WaitGroup){
+			ec.Add(errorx.NewFromString(strconv.Itoa(a)+":error"))
+			wg.Done()
+		}(i,&wg)
+	}
+	wg.Wait()
+	time.Sleep(10*time.Second)
+	fmt.Println("done")
+	ec.CloseHandles()
+
 }
 
 // Test handle error by self design log
@@ -35,12 +61,9 @@ func LogEr() func(e error) {
 
 // Test Logger handler
 func TestLogger(t *testing.T) {
-	ec := NewCollection()
-	ec.Add(errorx.NewFromString("an error happens"))
-	ec.Add(errorx.NewFromString("another error happens"))
-
+	Init()
 	//ec.Handle(Logger())
-	ec.Handle(Panic())
+	ec.AddHandler(Panic())
 	time.Sleep(3 * time.Second)
 	ec.Add(errorx.NewFromString("after 3s, happen an error"))
 	time.Sleep(1 * time.Second)

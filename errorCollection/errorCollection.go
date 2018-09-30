@@ -5,7 +5,9 @@ import (
 	queue "github.com/fwhezfwhez/go-queue"
 	"log"
 	"sync"
+	"time"
 )
+
 
 type ErrorBox *queue.Queue
 type ErrorHandler func(e error)
@@ -13,11 +15,9 @@ type ErrorHandler func(e error)
 type ErrorCollection struct {
 	errors           ErrorBox       // store errors in queue
 	ErrorHandleChain []ErrorHandler // handler to deal with error
-	M                *sync.Mutex    // field lock
-	HasErrorChan     chan error     // not use
+	M                *sync.Mutex    // field lock RWlock
 	CatchErrorChan   chan error     // when error in queue,it will be put into catchErrorChan
 	AutoHandleChan   chan int       // used to close the channel
-	AutoHandleFlag   bool
 }
 
 // New a error collection
@@ -25,11 +25,9 @@ func NewCollection() *ErrorCollection {
 	log.SetFlags(log.Llongfile | log.LstdFlags)
 	return &ErrorCollection{
 		errors:           queue.NewCap(200),
-		ErrorHandleChain: make([]ErrorHandler, 0, 5),
-		HasErrorChan:     make(chan error, 1),
+		ErrorHandleChain: make([]ErrorHandler, 0, 500),
 		CatchErrorChan:   make(chan error, 1),
 		AutoHandleChan:   make(chan int, 1),
-		AutoHandleFlag:   false,
 		M:                &sync.Mutex{},
 	}
 }
@@ -54,7 +52,14 @@ func (ec *ErrorCollection) Length() int {
 
 // Add an error into collect
 func (ec *ErrorCollection) Add(e error) {
-	(*queue.Queue)(ec.errors).Push(e)
+	ec.M.Lock()
+	defer ec.M.Unlock()
+
+	if len(ec.CatchErrorChan) < cap(ec.CatchErrorChan) {
+        ec.CatchErrorChan <-e
+	}else{
+		(*queue.Queue)(ec.errors).Push(e)
+	}
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("catch a panic：%s\n", r)
@@ -97,7 +102,18 @@ func (ec *ErrorCollection) CloseHandles() {
 	defer ec.M.Unlock()
 	close(ec.AutoHandleChan)
 }
+func (ec *ErrorCollection) OpenHandles() {
+	ec.M.Lock()
+	defer ec.M.Unlock()
+	close(ec.AutoHandleChan)
+}
 
+func(ec *ErrorCollection) IfErrorChanFull()bool{
+	if len(ec.CatchErrorChan) < cap(ec.CatchErrorChan){
+		return false
+	}
+	return true
+}
 // Handle the error queue one by one  by those handler added
 // How to add a handler>
 // ec.AddHandler(Logger(),Panic(),SendEmail()) ...
@@ -109,7 +125,7 @@ func (ec *ErrorCollection) HandleChain() {
 	L:
 		for {
 			select {
-			case e := <-ec.CatchError():
+			case e := <-ec.CatchErrorChan:
 				for _, f := range ec.ErrorHandleChain {
 					f(e)
 				}
@@ -143,10 +159,14 @@ func (ec *ErrorCollection) Pop() error {
 	q := (*queue.Queue)(ec.errors)
 	ec.GetQueueLock().Lock()
 	defer ec.GetQueueLock().Unlock()
-	if ec.Length() > 0 {
-		e := q.Pop().(error)
-		return errorx.Wrap(e)
-	}
+	//if ec.Length() > 0 {
+		v := q.Pop()
+		if v!=nil{
+			e:=v.(error)
+			return e
+		}
+		return nil
+	//}
 	return nil
 }
 
@@ -173,42 +193,17 @@ func (ec *ErrorCollection) CatchError() <-chan error {
 				break L
 			default:
 				ec.M.Lock()
-				if ec.Length() > 0 {
-					ec.CatchErrorChan <- ec.Pop()
+			    if x:=ec.Pop();x!=nil{
+			    	ec.CatchErrorChan <-x
 				}
 				ec.M.Unlock()
 			}
-
+			time.Sleep(200*time.Millisecond)
 		}
 	}()
 	return ec.CatchErrorChan
 }
 
-// When an error in , it will be passed into a chanel waiting for handling but the error remains in the collection
-func (ec *ErrorCollection) HasError() <-chan error {
-	go func() {
-		for {
-			if ec.Length() > 0 {
-				ec.CatchErrorChan <- ec.GetError()
-			}
-		}
-	}()
-	return ec.HasErrorChan
-}
-
-//// When error in, it will be automatically handled by the added handlers
-//func (ec *ErrorCollection) AutoHandle(){
-//	for{
-//		select{
-//			case <-ec.AutoHandleChan:
-//				log.Println("auto handle close successfully")
-//				break
-//			case e := <- ec.CatchError():
-//
-//			//TODO
-//		}
-//	}
-//}
 
 // Logger records error msg in log without modifying error queue.
 func Logger() func(e error) {
