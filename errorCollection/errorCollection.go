@@ -102,11 +102,6 @@ func (ec *ErrorCollection) CloseHandles() {
 	defer ec.M.Unlock()
 	close(ec.AutoHandleChan)
 }
-func (ec *ErrorCollection) OpenHandles() {
-	ec.M.Lock()
-	defer ec.M.Unlock()
-	close(ec.AutoHandleChan)
-}
 
 func(ec *ErrorCollection) IfErrorChanFull()bool{
 	if len(ec.CatchErrorChan) < cap(ec.CatchErrorChan){

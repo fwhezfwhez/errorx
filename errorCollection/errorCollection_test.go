@@ -31,6 +31,10 @@ func TestErrorCollection_Handle(t *testing.T) {
 	ec.CloseHandles()
 
 	time.Sleep(10 * time.Second)
+
+	ec.HandleChain()
+	time.Sleep(1* time.Second)
+	ec.Add(errorx.NewFromString("restart error"))
 }
 
 func TestHandle(t *testing.T){
