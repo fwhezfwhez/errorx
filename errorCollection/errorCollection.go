@@ -112,6 +112,17 @@ func(ec *ErrorCollection) IfErrorChanFull()bool{
 // Handle the error queue one by one  by those handler added
 // How to add a handler>
 // ec.AddHandler(Logger(),Panic(),SendEmail()) ...
+// How to make handler routine dependent?
+//
+//	func LogEr() func(e error) {
+//		return func(e error) {
+//			go func(er error) {
+//				log.SetFlags(log.Llongfile | log.LstdFlags)
+//				log.Println(e.Error())
+//          }(e)
+//		}
+//	}
+//
 func (ec *ErrorCollection) HandleChain() {
 	ec.newAutoHandleChan()
 	ec.CatchError()
