@@ -1,7 +1,7 @@
 package errorCollection
 
 import (
-	"errorX"
+	"github.com/fwhezfwhez/errorx"
 	queue "github.com/fwhezfwhez/go-queue"
 	"log"
 	"sync"
@@ -113,7 +113,8 @@ func(ec *ErrorCollection) IfErrorChanFull()bool{
 // How to add a handler>
 // ec.AddHandler(Logger(),Panic(),SendEmail()) ...
 // How to make handler routine dependent?
-//
+// ** When should do like this?**
+// ** When you realize the handler might risk timing out or**
 //	func LogEr() func(e error) {
 //		return func(e error) {
 //			go func(er error) {
