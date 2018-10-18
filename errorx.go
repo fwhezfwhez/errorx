@@ -29,7 +29,7 @@ type Error struct {
 	// basic
 	E           error
 	StackTraces []string
-
+	Context map[string]interface{}
 	// upper
 	ReGenerated bool
 	Errors      []error
@@ -41,6 +41,7 @@ func Empty() Error {
 	return Error{
 		E:           nil,
 		StackTraces: make([]string, 0, 30),
+		Context: make(map[string]interface{},0),
 		ReGenerated: false,
 		Errors:      make([]error, 0, 30),
 		Flag:        Llongfile | LcauseBy | LdateTime,
@@ -84,7 +85,7 @@ func New(e error) error {
 // print error stack trace
 // e.Flag only controls 'Error' type or official error which has been wrapped to 'Error'.
 // e.Flag only controls stack trace inner an Error type ,rather than some stack trace which has been init by api NewFromStackTrace([]string,string)
-func (e Error) PrintStackTrace() {
+func (e Error) PrintStackTrace() string{
 	header := make([]string,0, 10)
 	if e.Flag & LdateTime >0 {
 		header = append(header, "HappenAt")
@@ -100,6 +101,7 @@ func (e Error) PrintStackTrace() {
 	for _, v := range e.StackTraces {
 		fmt.Println(v)
 	}
+	return strings.Join(e.StackTraces,"\n")
 }
 
 // wrap an official error to Error type

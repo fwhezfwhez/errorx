@@ -15,7 +15,7 @@ func Init(){
 	ec  = NewCollection()
 	ec.Add(errorx.NewFromString("an error happens"))
 	ec.Add(errorx.NewFromString("another error happens"))
-	ec.AddHandler(LogEr())
+	//ec.AddHandler(LogEr())
 	ec.HandleChain()
 }
 

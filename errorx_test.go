@@ -48,6 +48,7 @@ func TestNew(t *testing.T) {
 
 	if e != nil {
 		t.Log(e.Error())
+		//fmt.Println(e.(Error).PrintStackTrace())
 		e.(Error).PrintStackTrace()
 	}
 }
