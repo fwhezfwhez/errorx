@@ -110,11 +110,27 @@ func LogEr() func(e error) {
 	return func(e error) {
 		log.SetFlags(log.Llongfile | log.LstdFlags)
 		log.Println(e.Error())
+
+		/*
+		    		switch v := e.(type) {
+            		case errorx.Error:
+            			log.Println(strings.Join(v.StackTraces, "\n"))
+            		case error:
+            			log.Println(e.Error())
+		*/
 	}
 }
 func Email() func(e error) {
 	return func(e error) {
 		fmt.Println("sending an email,error:",e.Error())
+
+				/*
+        		    		switch v := e.(type) {
+                    		case errorx.Error:
+                    			fmt.Println(strings.Join(v.StackTraces, "\n"))
+                    		case error:
+		                        fmt.Println("sending an email,error:",e.Error())
+        		*/
 	}
 }
 
@@ -131,5 +147,4 @@ func HandleAsNewRoutine() func(e error) {
 		}()
 	}
 }
-
 ```
