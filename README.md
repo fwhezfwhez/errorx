@@ -188,10 +188,13 @@ if er:= orderDao.GetAll();er!=nil{
 
 This way has some fatal disadvantages:
 
-**1.log.Println() will cause data escape which is bad for gc.And all log should be limitly used in product mode**.
-**2.A same error instance has been log several times which is badly read**.
-**3.If one or more error that may contain the same error.Error(),however log.Println is limited,It's hard to location the error spot.**
-**4.To improve '3',you may add 'debug.Stack()' to bind with the error.Don't! because this will read the whole Stack without specific depth.It causes cpu and io busy.**
+1.**log.Println() will cause data escape which is bad for gc.And all log should be limitly used in product mode**.
+
+2.**A same error instance has been log several times which is badly read**.
+
+3.**If one or more error that may contain the same error.Error(),however log.Println is limited,It's hard to location the error spot.**
+
+4.**To improve '3',you may add 'debug.Stack()' to bind with the error.Don't! because this will read the whole Stack without specific depth.It causes cpu and io busy.**
 
 To improve above:
 ```go
@@ -217,16 +220,19 @@ if er:= orderService.GetAll();er!=nil{
 
 #### Why this improves?
 
-**reply 1:er.(errorx.Error).StackTrace() is like**
+reply 1:**er.(errorx.Error).StackTrace() is like**
 ```
 G:/go_workspace/GOPATH/src/errorX/example/main.go: 26 | connect to mysql time out
 G:/go_workspace/GOPATH/src/errorX/example/main.go: 34 | connect to mysql time out
 G:/go_workspace/GOPATH/src/errorX/example/main.go: 42 | inner service error,please
 ```
 **no need to log everywhere but log once**.
-**reply 2: errorx only handle a same error**.
-**reply 3: if two error.Error() looks the same like 'connect to mysql time out', it differs in spot path**.
-**reply 4: stacktrace was recorded when error happen and pull a depth of 1 of runtime.Caller(-1).**
+
+reply 2: **errorx only handle a same error**.
+
+reply 3: **if two error.Error() looks the same like 'connect to mysql time out', it differs in spot path**.
+
+reply 4: **stacktrace was recorded when error happen and pull a depth of 1 of runtime.Caller(-1).**
 
 #### **2. use errorChain and errox together**
 assume a project like:
