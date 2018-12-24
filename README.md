@@ -150,7 +150,7 @@ func HandleAsNewRoutine() func(e error) {
 ```
 
 ## Advantages
-#### 1.**No need to log everywhere!**
+### 1.**No need to log everywhere!**
 assume a project like:
 ```
 main.go
@@ -234,7 +234,7 @@ reply 3: **if two error.Error() looks the same like 'connect to mysql time out',
 
 reply 4: **stacktrace was recorded when error happen and pull a depth of 1 of runtime.Caller(-1).**
 
-#### **2. use errorChain and errox together**
+### **2. use errorChain and errox together**
 assume a project like:
 ```
 main.go
