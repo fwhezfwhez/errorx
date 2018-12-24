@@ -173,7 +173,7 @@ we used to handle it like:
 // order_dao.go
 if er:= db.SQL("select * from order").Find(&orders);er!=nil{
     log.Println(er.Error)
-	return er
+    return er
 }
 
 ```
@@ -181,37 +181,42 @@ if er:= db.SQL("select * from order").Find(&orders);er!=nil{
 // order_service.go
 if er:= orderDao.GetAll();er!=nil{
     log.Println(er.Error)
-	return er
+    return er
 }
 ```
 **.............**
+
 This way has some fatal disadvantages:
+
 **1.log.Println() will cause data escape which is bad for gc.And all log should be limitly used in product mode**.
 **2.A same error instance has been log several times which is badly read**.
 **3.If one or more error that may contain the same error.Error(),however log.Println is limited,It's hard to location the error spot.**
 **4.To improve '3',you may add 'debug.Stack()' to bind with the error.Don't! because this will read the whole Stack without specific depth.It causes cpu and io busy.**
+
 To improve above:
 ```go
 // order_dao.go
 if er:= db.SQL("select * from order").Find(&orders);er!=nil{
-	return errorx.New(er)
+    return errorx.New(er)
 }
 
 ```
 ```go
 // order_service.go
 if er:= orderDao.GetAll();er!=nil{
-	return errorx.Wrap(er)
+    return errorx.Wrap(er)
 }
 ```
 ```go
 // order_control.go
 if er:= orderService.GetAll();er!=nil{
     handle(er.(errorx.Error).StackTrace())
-	w.Write([]byte(er.Error()))
+    w.Write([]byte(er.Error()))
 }
 ```
-Why this improves?
+
+#### Why this improves?
+
 **reply 1:er.(errorx.Error).StackTrace() is like**
 ```
 G:/go_workspace/GOPATH/src/errorX/example/main.go: 26 | connect to mysql time out
@@ -248,7 +253,7 @@ util/error_garbage/init.go
 var Garbage *errorCollection.ErrorCollection
 
 func init() {
-	Garbage = errorCollection.NewCollection()
+    Garbage = errorCollection.NewCollection()
 	Garbage.AddHandler(errorCollection.Fmt(), Sentry())
 	Garbage.HandleChain()
 }
