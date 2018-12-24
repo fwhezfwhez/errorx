@@ -1,9 +1,11 @@
 package errorCollection
 
 import (
+	"fmt"
 	"github.com/fwhezfwhez/errorx"
 	queue "github.com/fwhezfwhez/go-queue"
 	"log"
+	"strings"
 	"sync"
 	"time"
 )
@@ -217,6 +219,18 @@ func Logger() func(e error) {
 	return func(e error) {
 		log.SetFlags(log.LstdFlags | log.Llongfile)
 		log.Println(e)
+	}
+}
+
+// Fmt
+func Fmt() func(e error){
+	return func(e error) {
+		switch v:=e.(type){
+		case errorx.Error:
+			fmt.Println(strings.Join(v.StackTraces,"\n"))
+		default:
+			fmt.Println(v.Error())
+		}
 	}
 }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errorX"
 	"errors"
 	"fmt"
 	"github.com/fwhezfwhez/errorx/errorCollection"
@@ -22,7 +23,7 @@ func main() {
 
 	time.Sleep(2*time.Second)
 	// an error happen after 2 seconds
-	ec.Add(errors.New("I occur after 2s"))
+	ec.Add(errorx.NewFromString("I occur after 2s"))
 	// make sure the handling has its running time
 	time.Sleep(10* time.Second)
 }

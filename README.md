@@ -148,3 +148,142 @@ func HandleAsNewRoutine() func(e error) {
 	}
 }
 ```
+
+## Advantages
+#### 1.**No need to log everywhere!**
+assume a project like:
+```
+main.go
+control
+  |__user_control.go
+  |__order_control.go
+  |__other_control.go
+service
+  |__user_service.go
+  |__order_service.go
+  |__other_service.go
+dao
+  |__user_dao.go
+  |__order_dao.go
+  |__other_dao.go
+```
+
+we used to handle it like:
+```go
+// order_dao.go
+if er:= db.SQL("select * from order").Find(&orders);er!=nil{
+    log.Println(er.Error)
+	return er
+}
+
+```
+```go
+// order_service.go
+if er:= orderDao.GetAll();er!=nil{
+    log.Println(er.Error)
+	return er
+}
+```
+**.............**
+This way has some fatal disadvantages:
+**1.log.Println() will cause data escape which is bad for gc.And all log should be limitly used in product mode**.
+**2.A same error instance has been log several times which is badly read**.
+**3.If one or more error that may contain the same error.Error(),however log.Println is limited,It's hard to location the error spot.**
+**4.To improve '3',you may add 'debug.Stack()' to bind with the error.Don't! because this will read the whole Stack without specific depth.It causes cpu and io busy.**
+To improve above:
+```go
+// order_dao.go
+if er:= db.SQL("select * from order").Find(&orders);er!=nil{
+	return errorx.New(er)
+}
+
+```
+```go
+// order_service.go
+if er:= orderDao.GetAll();er!=nil{
+	return errorx.Wrap(er)
+}
+```
+```go
+// order_control.go
+if er:= orderService.GetAll();er!=nil{
+    handle(er.(errorx.Error).StackTrace())
+	w.Write([]byte(er.Error()))
+}
+```
+Why this improves?
+**reply 1:er.(errorx.Error).StackTrace() is like**
+```
+G:/go_workspace/GOPATH/src/errorX/example/main.go: 26 | connect to mysql time out
+G:/go_workspace/GOPATH/src/errorX/example/main.go: 34 | connect to mysql time out
+G:/go_workspace/GOPATH/src/errorX/example/main.go: 42 | inner service error,please
+```
+**no need to log everywhere but log once**.
+**reply 2: errorx only handle a same error**.
+**reply 3: if two error.Error() looks the same like 'connect to mysql time out', it differs in spot path**.
+**reply 4: stacktrace was recorded when error happen and pull a depth of 1 of runtime.Caller(-1).**
+
+#### **2. use errorChain and errox together**
+assume a project like:
+```
+main.go
+util
+  |__error_garbage
+          |__init.go
+control
+  |__user_control.go
+  |__order_control.go
+  |__other_control.go
+service
+  |__user_service.go
+  |__order_service.go
+  |__other_service.go
+dao
+  |__user_dao.go
+  |__order_dao.go
+  |__other_dao.go
+```
+util/error_garbage/init.go
+```go
+var Garbage *errorCollection.ErrorCollection
+
+func init() {
+	Garbage = errorCollection.NewCollection()
+	Garbage.AddHandler(errorCollection.Fmt(), Sentry())
+	Garbage.HandleChain()
+}
+// an example of handler
+func Sentry() func(e error) {
+	return func(e error) {
+		fmt.Println("an error has been sent to Sentry")
+		switch v := e.(type) {
+		case errorx.Error:
+			go raven.CaptureMessage("\n"+strings.Join(v.StackTraces, "\n"), map[string]string{"stackTrace": "\n" + strings.Join(v.StackTraces, "\n")})
+		case error:
+			go raven.CaptureMessage(v.Error(), map[string]string{"msg": v.Error()})
+		}
+	}
+}
+```
+```go
+// order_dao.go
+if er:= db.SQL("select * from order").Find(&orders);er!=nil{
+	return errorx.New(er)
+}
+
+```
+```go
+// order_service.go
+if er:= orderDao.GetAll();er!=nil{
+	return errorx.Wrap(er)
+}
+```
+```go
+// order_control.go
+if er:= orderService.GetAll();er!=nil{
+    // don't forget to import 'error_garbage' and rename as errorGarbage
+    errorGarbage.Garbage.Add(er)
+	w.Write([]byte(er.Error()))
+}
+```
+
