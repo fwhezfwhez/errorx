@@ -147,6 +147,11 @@ func NewFromString(msg string) error {
 	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
 }
 
+// new a error from a well format string
+func NewFromStringf(format string,msg... interface{}) error{
+	return NewFromString(fmt.Sprintf(format, msg...))
+}
+
 // new an error with existed stacktrace and generate the new error with new msg
 func NewFromStackTrace(stackTrace []string, msg string) error {
 	e := errors.New(msg)
