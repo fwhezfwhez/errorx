@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-const(
-	LcauseBy = 1 <<iota
+const (
+	LcauseBy = 1 << iota
 	LdateTime
 	Llongfile
 )
@@ -29,19 +29,18 @@ type Error struct {
 	// basic
 	E           error
 	StackTraces []string
-	Context map[string]interface{}
+	Context     map[string]interface{}
 	// upper
 	ReGenerated bool
 	Errors      []error
-	Flag  int
-
+	Flag        int
 }
 
 func Empty() Error {
 	return Error{
 		E:           nil,
 		StackTraces: make([]string, 0, 30),
-		Context: make(map[string]interface{},0),
+		Context:     make(map[string]interface{}, 0),
 		ReGenerated: false,
 		Errors:      make([]error, 0, 30),
 		Flag:        Llongfile | LcauseBy | LdateTime,
@@ -66,15 +65,15 @@ func New(e error) error {
 	switch v := e.(type) {
 	case Error:
 		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(v.Flag, file, line , v.Error())
+		trace := PrintStackFormat(v.Flag, file, line, v.Error())
 		v.StackTraces = append(v.StackTraces, trace)
 		return v
 	case error:
 		errorX := Empty()
 		errorX.E = e
-		errorX.Errors = append(errorX.Errors,e)
+		errorX.Errors = append(errorX.Errors, e)
 		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(Llongfile | LcauseBy| LdateTime, file, line , v.Error())
+		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
 		errorX.StackTraces = append(errorX.StackTraces, trace)
 		return errorX
 	}
@@ -85,15 +84,15 @@ func New(e error) error {
 // print error stack trace
 // e.Flag only controls 'Error' type or official error which has been wrapped to 'Error'.
 // e.Flag only controls stack trace inner an Error type ,rather than some stack trace which has been init by api NewFromStackTrace([]string,string)
-func (e Error) PrintStackTrace() string{
-	header := make([]string,0, 10)
-	if e.Flag & LdateTime >0 {
+func (e Error) PrintStackTrace() string {
+	header := make([]string, 0, 10)
+	if e.Flag&LdateTime > 0 {
 		header = append(header, "HappenAt")
 	}
-	if e.Flag & Llongfile >0 {
+	if e.Flag&Llongfile > 0 {
 		header = append(header, "StackTrace")
 	}
-	if e.Flag & LcauseBy >0 {
+	if e.Flag&LcauseBy > 0 {
 		header = append(header, "CauseBy")
 	}
 	fmt.Println(strings.Join(header, " | "))
@@ -101,7 +100,7 @@ func (e Error) PrintStackTrace() string{
 	for _, v := range e.StackTraces {
 		fmt.Println(v)
 	}
-	return strings.Join(e.StackTraces,"\n")
+	return strings.Join(e.StackTraces, "\n")
 }
 
 // wrap an official error to Error type
@@ -111,15 +110,15 @@ func Wrap(e error) error {
 	switch v := e.(type) {
 	case Error:
 		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(v.Flag, file, line , v.Error())
+		trace := PrintStackFormat(v.Flag, file, line, v.Error())
 		v.StackTraces = append(v.StackTraces, trace)
 		return v
 	case error:
 		errorX := Empty()
 		errorX.E = e
-		errorX.Errors = append(errorX.Errors,e)
+		errorX.Errors = append(errorX.Errors, e)
 		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(LdateTime | Llongfile | LcauseBy, file, line , v.Error())
+		trace := PrintStackFormat(LdateTime|Llongfile|LcauseBy, file, line, v.Error())
 		errorX.StackTraces = append(errorX.StackTraces, trace)
 		return errorX
 	}
@@ -132,15 +131,15 @@ func NewFromString(msg string) error {
 	switch v := e.(type) {
 	case Error:
 		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(v.Flag, file, line , v.Error())
+		trace := PrintStackFormat(v.Flag, file, line, v.Error())
 		v.StackTraces = append(v.StackTraces, trace)
 		return v
 	case error:
 		errorX := Empty()
 		errorX.E = e
-		errorX.Errors = append(errorX.Errors,e)
+		errorX.Errors = append(errorX.Errors, e)
 		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(Llongfile | LcauseBy| LdateTime, file, line , v.Error())
+		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
 		errorX.StackTraces = append(errorX.StackTraces, trace)
 		return errorX
 	}
@@ -148,8 +147,26 @@ func NewFromString(msg string) error {
 }
 
 // new a error from a well format string
-func NewFromStringf(format string,msg... interface{}) error{
+func NewFromStringf(format string, msg ... interface{}) error {
 	return NewFromString(fmt.Sprintf(format, msg...))
+}
+
+// group series of error to a single error
+func GroupErrors(errors ...error) error {
+	var tmp error
+	var stackTrace = make([]string, 0, 10*len(errors))
+	stackTrace = append(stackTrace, "######## Get a bunch of errors ########")
+	defer func() {
+		stackTrace = append(stackTrace, "######## /Get a bunch of errors ########")
+	}()
+
+	for i, e := range errors {
+		tmp = New(e)
+		stackTrace = append(stackTrace, fmt.Sprintf("\n##### error_%d #####",i))
+		stackTrace = append(stackTrace, tmp.(Error).StackTraces...)
+		stackTrace = append(stackTrace, fmt.Sprintf("##### /error_%d #####",i))
+	}
+	return NewFromStackTrace(stackTrace, "an error bunch")
 }
 
 // new an error with existed stacktrace and generate the new error with new msg
@@ -158,9 +175,9 @@ func NewFromStackTrace(stackTrace []string, msg string) error {
 	v := Empty()
 	v.E = e
 	v.StackTraces = stackTrace
-	v.Errors = append(v.Errors,e)
+	v.Errors = append(v.Errors, e)
 	_, file, line, _ := runtime.Caller(1)
-	trace := PrintStackFormat(v.Flag, file, line , v.Error())
+	trace := PrintStackFormat(v.Flag, file, line, v.Error())
 	v.StackTraces = append(v.StackTraces, trace)
 	return v
 }
@@ -176,12 +193,12 @@ func ReGen(old error, new error) error {
 		e = o
 		e.ReGenerated = true
 		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(e.Flag, file, line , new.Error())
+		trace := PrintStackFormat(e.Flag, file, line, new.Error())
 		e.StackTraces = append(e.StackTraces, trace)
 		e.Errors = append(e.Errors, old, new)
 	case error:
 		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(e.Flag, file, line , new.Error())
+		trace := PrintStackFormat(e.Flag, file, line, new.Error())
 		e.StackTraces = append(e.StackTraces, trace)
 		e.Errors = append(e.Errors, old, new)
 	}
@@ -190,7 +207,7 @@ func ReGen(old error, new error) error {
 
 // return an Error regardless of e's type
 func MustWrap(e error) Error {
-	switch v:=e.(type){
+	switch v := e.(type) {
 	case Error:
 		return v
 	case error:
@@ -199,21 +216,21 @@ func MustWrap(e error) Error {
 	return Empty()
 }
 
-func PrintStackFormat(flag int,file string,line int ,cause string) string {
-	var formatGroup = make([]string,0,3)
+func PrintStackFormat(flag int, file string, line int, cause string) string {
+	var formatGroup = make([]string, 0, 3)
 	var formatArgs = make([]interface{}, 0, 3)
-	if flag & LdateTime > 0 {
+	if flag&LdateTime > 0 {
 		formatGroup = append(formatGroup, "%s")
 		formatArgs = append(formatArgs, time.Now().Format("2006-01-02 15:04:05"))
 	}
-	if flag & Llongfile >0 {
-		formatGroup = append(formatGroup,"%s")
+	if flag&Llongfile > 0 {
+		formatGroup = append(formatGroup, "%s")
 		trace := fmt.Sprintf("%s: %d", file, line)
 		formatArgs = append(formatArgs, trace)
 	}
-	if flag & LcauseBy >0 {
-		formatGroup = append(formatGroup,"%s")
+	if flag&LcauseBy > 0 {
+		formatGroup = append(formatGroup, "%s")
 		formatArgs = append(formatArgs, cause)
 	}
-	return  fmt.Sprintf(strings.Join(formatGroup," | "), formatArgs...)
+	return fmt.Sprintf(strings.Join(formatGroup, " | "), formatArgs...)
 }
