@@ -6,13 +6,16 @@ import (
 	"log"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 )
+
 var ec *ErrorCollection
-func Init(){
-	ec  = NewCollection()
+
+func Init() {
+	ec = NewCollection()
 	ec.Add(errorx.NewFromString("an error happens"))
 	ec.Add(errorx.NewFromString("another error happens"))
 	//ec.AddHandler(LogEr())
@@ -33,23 +36,23 @@ func TestErrorCollection_Handle(t *testing.T) {
 	time.Sleep(10 * time.Second)
 
 	ec.HandleChain()
-	time.Sleep(1* time.Second)
+	time.Sleep(1 * time.Second)
 	ec.Add(errorx.NewFromString("restart error"))
 }
 
-func TestHandle(t *testing.T){
+func TestHandle(t *testing.T) {
 	Init()
-	time.Sleep(2*time.Second)
+	time.Sleep(2 * time.Second)
 	wg := sync.WaitGroup{}
 	wg.Add(10)
-	for i:=0;i<10;i++{
-		go func(a int,group *sync.WaitGroup){
-			ec.Add(errorx.NewFromString(strconv.Itoa(a)+":error"))
+	for i := 0; i < 10; i++ {
+		go func(a int, group *sync.WaitGroup) {
+			ec.Add(errorx.NewFromString(strconv.Itoa(a) + ":error"))
 			wg.Done()
-		}(i,&wg)
+		}(i, &wg)
 	}
 	wg.Wait()
-	time.Sleep(10*time.Second)
+	time.Sleep(10 * time.Second)
 	fmt.Println("done")
 	ec.CloseHandles()
 
@@ -90,6 +93,51 @@ func TestHandlerChain(t *testing.T) {
 	time.Sleep(5 * time.Second)
 	ec.Add(errorx.NewFromString("after 5s,an error occured"))
 	time.Sleep(2 * time.Second)
+	ec.CloseHandles()
+	time.Sleep(4 * time.Second)
+}
+
+// test handlers with context and basic together
+func TestHandlerChain2(t *testing.T) {
+	ec := NewCollection()
+	ec.Add(errorx.NewFromString("an error happens"))
+	ec.Add(errorx.NewFromString("another error happens"))
+
+	// basic
+	sendEmail := func(e error) {
+		fmt.Println("send email:", e.Error())
+	}
+	ec.AddHandler(Logger(), sendEmail)
+
+	// with context
+	ignoreError := func(e error, ctx *Context) bool {
+		if strings.Contains(e.Error(), "an ignorable error happens") {
+			return false
+		}
+		return true
+	}
+
+	errorPutContext := func(e error, ctx *Context) bool {
+		ctx.Set("has-error", true)
+		return true
+	}
+
+	errorGetContext := func(e error, ctx *Context) bool {
+		if ctx.GetBool("has-error") {
+			fmt.Println("found a error in according 'has-error'")
+		}
+		return true
+	}
+
+	ec.AddHandlerWithContext(ignoreError, errorPutContext, errorGetContext)
+
+	ec.HandleChain()
+
+	time.Sleep(5 * time.Second)
+	ec.Add(errorx.NewFromString("after 5s,an error occured"))
+	time.Sleep(2 * time.Second)
+
+	ec.Add(errorx.NewFromStringf("an ignorable error happens"))
 	ec.CloseHandles()
 	time.Sleep(4 * time.Second)
 }

@@ -21,11 +21,13 @@ func main() {
 	// assume an error occur
 	ec.Add(errors.New("I am an error"))
 
-	time.Sleep(2*time.Second)
+	time.Sleep(2 * time.Second)
 	// an error happen after 2 seconds
 	ec.Add(errorx.NewFromString("I occur after 2s"))
+
+	fmt.Printf("test add nil")
 	// make sure the handling has its running time
-	time.Sleep(10* time.Second)
+	time.Sleep(10 * time.Second)
 }
 func LogEr() func(e error) {
 	return func(e error) {
@@ -35,7 +37,7 @@ func LogEr() func(e error) {
 }
 func Email() func(e error) {
 	return func(e error) {
-		fmt.Println("sending an email,error:",e.Error())
+		fmt.Println("sending an email,error:", e.Error())
 	}
 }
 
@@ -48,6 +50,13 @@ func ReportToCloud() func(e error) {
 func HandleAsNewRoutine() func(e error) {
 	return func(e error) {
 		go func() {
+			/*
+			switch v := e.(type) {
+			case errorx.Error:
+				fmt.Println(strings.Join(v.StackTraces, "\n"))
+			case error:
+				fmt.Println(e.Error())
+           */
 			fmt.Println("handler the error routinely in case that the handler would cost much time")
 		}()
 	}
