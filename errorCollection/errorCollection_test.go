@@ -100,15 +100,6 @@ func TestHandlerChain(t *testing.T) {
 // test handlers with context and basic together
 func TestHandlerChain2(t *testing.T) {
 	ec := NewCollection()
-	ec.Add(errorx.NewFromString("an error happens"))
-	ec.Add(errorx.NewFromString("another error happens"))
-
-	// basic
-	sendEmail := func(e error) {
-		fmt.Println("send email:", e.Error())
-	}
-	ec.AddHandler(Logger(), sendEmail)
-
 	// with context
 	ignoreError := func(e error, ctx *Context) bool {
 		if strings.Contains(e.Error(), "an ignorable error happens") {

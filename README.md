@@ -7,16 +7,15 @@ a very convenient error handler.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [errorx](#errorx)
-  - [1. What is different from the officials](#1-what-is-different-from-the-officials)
-  - [2. Start](#2-start)
-  - [3. Ussage](#3-ussage)
-      - [3.1 A basic example of using errorx replacing errors](#31-a-basic-example-of-using-errorx-replacing-errors)
-      - [3.2 A basic ussage of error chain](#32-a-basic-ussage-of-error-chain)
-      - [3.3 A basic ussage of error chain whose handlers have context and next handler control.](#33-a-basic-ussage-of-error-chain-whose-handlers-have-context-and-next-handler-control)
-  - [4. Advantages](#4-advantages)
-      - [4.1.**No need to log everywhere!**](#41no-need-to-log-everywhere)
-  - [5. Use errorChain and errox together in product mode](#5-use-errorchain-and-errox-together-in-product-mode)
+- [1. What is different from the officials](#1-what-is-different-from-the-officials)
+- [2. Start](#2-start)
+- [3. Ussage](#3-ussage)
+    - [3.1 A basic example of using errorx replacing errors](#31-a-basic-example-of-using-errorx-replacing-errors)
+    - [3.2 A basic ussage of error chain](#32-a-basic-ussage-of-error-chain)
+    - [3.3 A basic ussage of error chain whose handlers have context and next handler control.](#33-a-basic-ussage-of-error-chain-whose-handlers-have-context-and-next-handler-control)
+- [4. Advantages](#4-advantages)
+    - [4.1. No need to log everywhere!](#41no-need-to-log-everywhere)
+- [5. Use errorChain and errox together in product mode](#5-use-errorchain-and-errox-together-in-product-mode)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -175,19 +174,52 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/fwhezfwhez/errorx/errorCollection"
+	erc "github.com/fwhezfwhez/errorx/errorCollection"
+	"github.com/fwhezfwhez/errorx"
 	"log"
 	"time"
 )
 
 func main() {
+	ec := erc.NewCollection()
+	// with context
+	ignoreError := func(e error, ctx *Context) bool {
+		if strings.Contains(e.Error(), "an ignorable error happens") {
+			return false
+		}
+		return true
+	}
+
+	errorPutContext := func(e error, ctx *erc.Context) bool {
+		ctx.Set("has-error", true)
+		return true
+	}
+
+	errorGetContext := func(e error, ctx *erc.Context) bool {
+		if ctx.GetBool("has-error") {
+			fmt.Println("found a error in according 'has-error'")
+		}
+		return true
+	}
+
+	ec.AddHandlerWithContext(ignoreError, errorPutContext, errorGetContext)
+
+	ec.HandleChain()
+
+	time.Sleep(5 * time.Second)
+	ec.Add(errorx.NewFromString("after 5s,an error occured"))
+	time.Sleep(2 * time.Second)
+
+	ec.Add(errorx.NewFromStringf("an ignorable error happens"))
+	ec.CloseHandles()
+	time.Sleep(4 * time.Second)
 
 }
 
 ```
 
 ## 4. Advantages
-#### 4.1.**No need to log everywhere!**
+#### 4.1. No need to log everywhere!
 assume a project like:
 ```
 main.go
