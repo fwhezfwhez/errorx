@@ -36,52 +36,52 @@ a very convenient error handler.
 package main
 
 import (
-	"github.com/fwhezfwhez/errorx"
-	"errors"
-	"fmt"
+    "github.com/fwhezfwhez/errorx"
+    "errors"
+    "fmt"
 )
 
 func main() {
-	if e := Control(); e != nil {
-		e.(errorx.Error).PrintStackTrace()
-		//log.Println(e.(errorx.Error).StackTrace())
-	} else {
-		Reply()
-	}
+    if e := Control(); e != nil {
+        e.(errorx.Error).PrintStackTrace()
+        //log.Println(e.(errorx.Error).StackTrace())
+    } else {
+        Reply()
+    }
 }
 
 // assume an engine to connect mysql
 func DB() error {
-	return errors.New("connect to mysql time out")
+    return errors.New("connect to mysql time out")
 }
 
 // handle database operation
 func Dao() error {
-	if er := DB(); er != nil {
-		return errorx.New(er)
-	}
-	return nil
+    if er := DB(); er != nil {
+        return errorx.New(er)
+    }
+    return nil
 }
 
 // handle logic service
 func Service() error {
-	if er := Dao(); er != nil {
-		return errorx.Wrap(er)
-	}
-	return nil
+    if er := Dao(); er != nil {
+        return errorx.Wrap(er)
+    }
+    return nil
 }
 
 // handle request distribute from main
 func Control() error {
-	if er := Service(); er != nil {
-		return errorx.ReGen(er, errors.New("inner service error,please call admin for help"))
-	}
-	return nil
+    if er := Service(); er != nil {
+        return errorx.ReGen(er, errors.New("inner service error,please call admin for help"))
+    }
+    return nil
 }
 
 // reply a the request
 func Reply(){
-	fmt.Println("handle success")
+    fmt.Println("handle success")
 }
 ```
 
@@ -99,71 +99,71 @@ G:/go_workspace/GOPATH/src/errorX/example/main.go: 42 | inner service error,plea
 package main
 
 import (
-	"errors"
-	"fmt"
-	"github.com/fwhezfwhez/errorx/errorCollection"
-	"log"
-	"time"
+    "errors"
+    "fmt"
+    "github.com/fwhezfwhez/errorx/errorCollection"
+    "log"
+    "time"
 )
 
 func main() {
-	fmt.Println("test error chain handlers")
-	// init
-	ec := errorCollection.NewCollection()
-	// add handler
-	ec.AddHandler(LogEr(), Email(), ReportToCloud(), HandleAsNewRoutine())
-	// begin handling and wait for errors
-	ec.HandleChain()
+    fmt.Println("test error chain handlers")
+    // init
+    ec := errorCollection.NewCollection()
+    // add handler
+    ec.AddHandler(LogEr(), Email(), ReportToCloud(), HandleAsNewRoutine())
+    // begin handling and wait for errors
+    ec.HandleChain()
 
-	// assume an error occur
-	ec.Add(errors.New("I am an error"))
+    // assume an error occur
+    ec.Add(errors.New("I am an error"))
 
-	time.Sleep(2*time.Second)
-	// an error happen after 2 seconds
-	ec.Add(errors.New("I occur after 2s"))
-	// make sure the handling has its running time
-	time.Sleep(10* time.Second)
+    time.Sleep(2*time.Second)
+    // an error happen after 2 seconds
+    ec.Add(errors.New("I occur after 2s"))
+    // make sure the handling has its running time
+    time.Sleep(10* time.Second)
 }
 func LogEr() func(e error) {
-	return func(e error) {
-		log.SetFlags(log.Llongfile | log.LstdFlags)
-		log.Println(e.Error())
+    return func(e error) {
+        log.SetFlags(log.Llongfile | log.LstdFlags)
+        log.Println(e.Error())
 
-		/*
-		    		switch v := e.(type) {
-            		case errorx.Error:
-            			log.Println(strings.Join(v.StackTraces, "\n"))
-            		case error:
-            			log.Println(e.Error())
-		*/
-	}
+        /*
+                    switch v := e.(type) {
+                    case errorx.Error:
+                        log.Println(strings.Join(v.StackTraces, "\n"))
+                    case error:
+                        log.Println(e.Error())
+        */
+    }
 }
 func Email() func(e error) {
-	return func(e error) {
-		fmt.Println("sending an email,error:",e.Error())
+    return func(e error) {
+        fmt.Println("sending an email,error:",e.Error())
 
-				/*
-        		    		switch v := e.(type) {
-                    		case errorx.Error:
-                    			fmt.Println(strings.Join(v.StackTraces, "\n"))
-                    		case error:
-		                        fmt.Println("sending an email,error:",e.Error())
-        		*/
-	}
+                /*
+                            switch v := e.(type) {
+                            case errorx.Error:
+                                fmt.Println(strings.Join(v.StackTraces, "\n"))
+                            case error:
+                                fmt.Println("sending an email,error:",e.Error())
+                */
+    }
 }
 
 func ReportToCloud() func(e error) {
-	return func(e error) {
-		fmt.Println("reporting the error to cloud,error:", e.Error())
-	}
+    return func(e error) {
+        fmt.Println("reporting the error to cloud,error:", e.Error())
+    }
 }
 
 func HandleAsNewRoutine() func(e error) {
-	return func(e error) {
-		go func() {
-			fmt.Println("handler the error routinely in case that the handler would cost much time")
-		}()
-	}
+    return func(e error) {
+        go func() {
+            fmt.Println("handler the error routinely in case that the handler would cost much time")
+        }()
+    }
 }
 ```
 
@@ -172,47 +172,47 @@ func HandleAsNewRoutine() func(e error) {
 package main
 
 import (
-	"errors"
-	"fmt"
-	erc "github.com/fwhezfwhez/errorx/errorCollection"
-	"github.com/fwhezfwhez/errorx"
-	"log"
-	"time"
+    "errors"
+    "fmt"
+    erc "github.com/fwhezfwhez/errorx/errorCollection"
+    "github.com/fwhezfwhez/errorx"
+    "log"
+    "time"
 )
 
 func main() {
-	ec := erc.NewCollection()
-	// with context
-	ignoreError := func(e error, ctx *Context) bool {
-		if strings.Contains(e.Error(), "an ignorable error happens") {
-			return false
-		}
-		return true
-	}
+    ec := erc.NewCollection()
+    // with context
+    ignoreError := func(e error, ctx *Context) bool {
+        if strings.Contains(e.Error(), "an ignorable error happens") {
+            return false
+        }
+        return true
+    }
 
-	errorPutContext := func(e error, ctx *erc.Context) bool {
-		ctx.Set("has-error", true)
-		return true
-	}
+    errorPutContext := func(e error, ctx *erc.Context) bool {
+        ctx.Set("has-error", true)
+        return true
+    }
 
-	errorGetContext := func(e error, ctx *erc.Context) bool {
-		if ctx.GetBool("has-error") {
-			fmt.Println("found a error in according 'has-error'")
-		}
-		return true
-	}
+    errorGetContext := func(e error, ctx *erc.Context) bool {
+        if ctx.GetBool("has-error") {
+            fmt.Println("found a error in according 'has-error'")
+        }
+        return true
+    }
 
-	ec.AddHandlerWithContext(ignoreError, errorPutContext, errorGetContext)
+    ec.AddHandlerWithContext(ignoreError, errorPutContext, errorGetContext)
 
-	ec.HandleChain()
+    ec.HandleChain()
 
-	time.Sleep(5 * time.Second)
-	ec.Add(errorx.NewFromString("after 5s,an error occured"))
-	time.Sleep(2 * time.Second)
+    time.Sleep(5 * time.Second)
+    ec.Add(errorx.NewFromString("after 5s,an error occured"))
+    time.Sleep(2 * time.Second)
 
-	ec.Add(errorx.NewFromStringf("an ignorable error happens"))
-	ec.CloseHandles()
-	time.Sleep(4 * time.Second)
+    ec.Add(errorx.NewFromStringf("an ignorable error happens"))
+    ec.CloseHandles()
+    time.Sleep(4 * time.Second)
 
 }
 
@@ -330,48 +330,48 @@ var Garbage *errorCollection.ErrorCollection
 func init() {
     Garbage = errorCollection.NewCollection()
     // these typed handlers will handle error parallelly, they cannot influence each others
-	Garbage.AddHandler(errorCollection.Fmt(), Sentry())
+    Garbage.AddHandler(errorCollection.Fmt(), Sentry())
     // these typed handlers work in series, when error can be ignored in 'IgnoreError', 'SendEmail' wiil not be executed
     Garbage.AddHandlerWithContext(IgnoreError, SendEmail)
-	Garbage.HandleChain()
+    Garbage.HandleChain()
 }
 // an example of handler
 func Sentry() func(e error) {
-	return func(e error) {
-		fmt.Println("an error has been sent to Sentry")
-		switch v := e.(type) {
-		case errorx.Error:
-			go raven.CaptureMessage("\n"+strings.Join(v.StackTraces, "\n"), map[string]string{"stackTrace": "\n" + strings.Join(v.StackTraces, "\n")})
-		case error:
-			go raven.CaptureMessage(v.Error(), map[string]string{"msg": v.Error()})
-		}
-	}
+    return func(e error) {
+        fmt.Println("an error has been sent to Sentry")
+        switch v := e.(type) {
+        case errorx.Error:
+            go raven.CaptureMessage("\n"+strings.Join(v.StackTraces, "\n"), map[string]string{"stackTrace": "\n" + strings.Join(v.StackTraces, "\n")})
+        case error:
+            go raven.CaptureMessage(v.Error(), map[string]string{"msg": v.Error()})
+        }
+    }
 }
 
 func IgnoreError(e error, ctx *errorCollection.Context) bool{
     if strings.Contains(e.Error(), "An existing connection was forcibly closed by the remote host") {
-	    return false
-	}
-	return true
+        return false
+    }
+    return true
 }
 
 func SendEmail(e error, ctx *errorCollection.Context) bool{
     // send email
     fmt.Println(fmt.Sprintf("send an email success: '%s'", e.Error()))
-	return true
+    return true
 }
 ```
 ```go
 // order_dao.go
 if er:= db.SQL("select * from order").Find(&orders);er!=nil{
-	return errorx.New(er)
+    return errorx.New(er)
 }
 
 ```
 ```go
 // order_service.go
 if er:= orderDao.GetAll();er!=nil{
-	return errorx.Wrap(er)
+    return errorx.Wrap(er)
 }
 ```
 ```go
@@ -379,7 +379,7 @@ if er:= orderDao.GetAll();er!=nil{
 if er:= orderService.GetAll();er!=nil{
     // don't forget to import 'error_garbage' and rename as errorGarbage
     errorGarbage.Garbage.Add(er)
-	w.Write([]byte(er.Error()))
+    w.Write([]byte(er.Error()))
 }
 
 ```
