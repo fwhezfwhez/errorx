@@ -3,7 +3,24 @@
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/fwhezfwhez-errorx/community)
 
 a very convenient error handler.
-## What is different from the officials
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [errorx](#errorx)
+  - [1. What is different from the officials](#1-what-is-different-from-the-officials)
+  - [2. Start](#2-start)
+  - [3. Ussage](#3-ussage)
+      - [3.1 A basic example of using errorx replacing errors](#31-a-basic-example-of-using-errorx-replacing-errors)
+      - [3.2 A basic ussage of error chain](#32-a-basic-ussage-of-error-chain)
+      - [3.3 A basic ussage of error chain whose handlers have context and next handler control.](#33-a-basic-ussage-of-error-chain-whose-handlers-have-context-and-next-handler-control)
+  - [4. Advantages](#4-advantages)
+      - [4.1.**No need to log everywhere!**](#41no-need-to-log-everywhere)
+  - [5. Use errorChain and errox together in product mode](#5-use-errorchain-and-errox-together-in-product-mode)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## 1. What is different from the officials
 | property | info | example | error | errorx |
 |:----------- | :---- |:------|:-------------:|--:|
 | Error() | what the error really is  | password wrong | yes | yes |
@@ -11,10 +28,11 @@ a very convenient error handler.
 | ReGen() | covering the real cause and return new error|  real_cause: time out -> user_view:inner service error | no | yes|
 | errorChain | an error can be handled by handlers | | no | yes|
 
-## start
+## 2. Start
 `go get github.com/fwhezfwhez/errorx`
 
-## Basic
+## 3. Ussage
+#### 3.1 A basic example of using errorx replacing errors
 ```go
 package main
 
@@ -77,7 +95,7 @@ G:/go_workspace/GOPATH/src/errorX/example/main.go: 42 | inner service error,plea
 
 ```
 
-## ErrorChain
+#### 3.2 A basic ussage of error chain
 ```go
 package main
 
@@ -150,8 +168,26 @@ func HandleAsNewRoutine() func(e error) {
 }
 ```
 
-## Advantages
-### 1.**No need to log everywhere!**
+#### 3.3 A basic ussage of error chain whose handlers have context and next handler control.
+```go
+package main
+
+import (
+	"errors"
+	"fmt"
+	"github.com/fwhezfwhez/errorx/errorCollection"
+	"log"
+	"time"
+)
+
+func main() {
+
+}
+
+```
+
+## 4. Advantages
+#### 4.1.**No need to log everywhere!**
 assume a project like:
 ```
 main.go
@@ -219,7 +255,7 @@ if er:= orderService.GetAll();er!=nil{
 }
 ```
 
-#### Why this improves?
+** Why this improves? **
 
 reply 1:**er.(errorx.Error).StackTrace() is like**
 ```
@@ -235,7 +271,7 @@ reply 3: **if two error.Error() looks the same like 'connect to mysql time out',
 
 reply 4: **stacktrace was recorded when error happen and pull a depth of 1 of runtime.Caller(-1).**
 
-### **2. use errorChain and errox together**
+## 5. Use errorChain and errox together in product mode
 assume a project like:
 ```
 main.go
@@ -261,7 +297,10 @@ var Garbage *errorCollection.ErrorCollection
 
 func init() {
     Garbage = errorCollection.NewCollection()
+    // these typed handlers will handle error parallelly, they cannot influence each others
 	Garbage.AddHandler(errorCollection.Fmt(), Sentry())
+    // these typed handlers work in series, when error can be ignored in 'IgnoreError', 'SendEmail' wiil not be executed
+    Garbage.AddHandlerWithContext(IgnoreError, SendEmail)
 	Garbage.HandleChain()
 }
 // an example of handler
@@ -275,6 +314,19 @@ func Sentry() func(e error) {
 			go raven.CaptureMessage(v.Error(), map[string]string{"msg": v.Error()})
 		}
 	}
+}
+
+func IgnoreError(e error, ctx *errorCollection.Context) bool{
+    if strings.Contains(e.Error(), "An existing connection was forcibly closed by the remote host") {
+	    return false
+	}
+	return true
+}
+
+func SendEmail(e error, ctx *errorCollection.Context) bool{
+    // send email
+    fmt.Println(fmt.Sprintf("send an email success: '%s'", e.Error()))
+	return true
 }
 ```
 ```go
@@ -297,5 +349,7 @@ if er:= orderService.GetAll();er!=nil{
     errorGarbage.Garbage.Add(er)
 	w.Write([]byte(er.Error()))
 }
+
 ```
+
 
