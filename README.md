@@ -3,19 +3,21 @@
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/fwhezfwhez-errorx/community)
 
 a very convenient error handler.
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [1. What is different from the officials](#1-what-is-different-from-the-officials)
-- [2. Start](#2-start)
-- [3. Ussage](#3-ussage)
-    - [3.1 A basic example of using errorx replacing errors](#31-a-basic-example-of-using-errorx-replacing-errors)
-    - [3.2 A basic ussage of error chain](#32-a-basic-ussage-of-error-chain)
-    - [3.3 A basic ussage of error chain whose handlers have context and next handler control.](#33-a-basic-ussage-of-error-chain-whose-handlers-have-context-and-next-handler-control)
-- [4. Advantages](#4-advantages)
-    - [4.1. No need to log everywhere!](#41no-need-to-log-everywhere)
-- [5. Use errorChain and errox together in product mode](#5-use-errorchain-and-errox-together-in-product-mode)
+- [errorx](#errorx)
+  - [1. What is different from the officials](#1-what-is-different-from-the-officials)
+  - [2. Start](#2-start)
+  - [3. Ussage](#3-ussage)
+      - [3.1 A basic example of using errorx replacing errors](#31-a-basic-example-of-using-errorx-replacing-errors)
+      - [3.2 A basic ussage of error chain](#32-a-basic-ussage-of-error-chain)
+      - [3.3 A basic ussage of error chain whose handlers have context and next handler control.](#33-a-basic-ussage-of-error-chain-whose-handlers-have-context-and-next-handler-control)
+  - [4. Advantages](#4-advantages)
+      - [4.1. No need to log everywhere!](#41-no-need-to-log-everywhere)
+  - [5. Use errorChain and errox together in product mode](#5-use-errorchain-and-errox-together-in-product-mode)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
