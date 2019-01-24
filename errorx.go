@@ -36,6 +36,10 @@ type Error struct {
 	Flag        int
 }
 
+func (e Error) String() string{
+	return e.StackTraceValue()
+}
+
 func Empty() Error {
 	return Error{
 		E:           nil,
@@ -48,7 +52,7 @@ func Empty() Error {
 }
 
 func (e Error) Error() string {
-	return e.E.Error()
+	return e.StackTraceValue()
 }
 
 // return its stacktrace
@@ -103,6 +107,23 @@ func (e Error) PrintStackTrace() string {
 	return strings.Join(e.StackTraces, "\n")
 }
 
+func (e Error) StackTraceValue() string {
+	header := make([]string, 0, 10)
+	if e.Flag&LdateTime > 0 {
+		header = append(header, "HappenAt")
+	}
+	if e.Flag&Llongfile > 0 {
+		header = append(header, "StackTrace")
+	}
+	if e.Flag&LcauseBy > 0 {
+		header = append(header, "CauseBy")
+	}
+	headerStr := strings.Join(header, " | ")
+	rs := make([]string, 0,len(e.StackTraces)+1)
+	rs = append(rs,headerStr)
+	rs = append(rs,e.StackTraces...)
+	return strings.Join(rs, "\n")
+}
 // wrap an official error to Error type
 // function do the same as New()
 // New() or Wrap() depends on its semantics. mixing them is also correct.

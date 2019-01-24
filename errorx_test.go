@@ -157,5 +157,5 @@ func TestErrorGroup(t *testing.T) {
 		errors = append(errors, NewFromStringf("error_%d", i+1))
 	}
 	e := GroupErrors(errors...)
-	e.(Error).PrintStackTrace()
+	fmt.Println(e)
 }
