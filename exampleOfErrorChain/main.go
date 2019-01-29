@@ -1,9 +1,9 @@
 package main
 
 import (
-	"errorX"
 	"errors"
 	"fmt"
+	"github.com/fwhezfwhez/errorx"
 	"github.com/fwhezfwhez/errorx/errorCollection"
 	"log"
 	"time"
