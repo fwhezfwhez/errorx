@@ -282,12 +282,12 @@ func Fmt() func(e error) {
 // Panic aims to fix the panic cause error and ignore other errors unless you fix the error up
 func Panic() func(e error) {
 	return func(e error) {
-		//defer func() {
-		//	if r := recover(); r != nil {
-		//		log.SetFlags(log.LstdFlags | log.Llongfile)
-		//		log.Println("panic and recover,because of:", r)
-		//	}
-		//}()
-		go func() { panic(e.Error()) }()
+		defer func() {
+			if r := recover(); r != nil {
+				log.SetFlags(log.LstdFlags | log.Llongfile)
+				log.Println("panic and recover,because of:", r)
+			}
+		}()
+		 panic(e.Error())
 	}
 }
