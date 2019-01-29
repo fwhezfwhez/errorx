@@ -11,11 +11,9 @@ go_import_path: github.com/fwhezfwhez/errorx
 before_install:
   - go get github.com/fwhezfwhez/errorx
   - go get github.com/fwhezfwhez/go-queue
-script:  
+script:
   - go build example/main.go
-  - go test
-  - cd errorCollection
-  - go test
-  - cd ..
+  - go test ./
+  - go test ./errorCollection
 notifications:
   email: false
