@@ -151,6 +151,8 @@ func TestPrintStackFormat(t *testing.T) {
 }
 
 func TestErrorGroup(t *testing.T) {
+	t.Fail()
+	return
 	var length = 10
 	var errors = make([]error, 0, length)
 	for i := 0; i < length; i++ {
