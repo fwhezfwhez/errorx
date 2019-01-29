@@ -13,5 +13,9 @@ before_install:
   - go get github.com/fwhezfwhez/go-queue
 script:  
   - go build example/main.go
+  - go test
+  - cd errorCollection
+  - go test
+  - cd ..
 notifications:
   email: false
