@@ -1,5 +1,7 @@
 # errorx
-[![Godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/fwhezfwhez/errorx)[![Build Status]( https://www.travis-ci.org/fwhezfwhez/errorx.svg?branch=master)]( https://www.travis-ci.org/fwhezfwhez/errorx)[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/fwhezfwhez-errorx/community)
+[![Godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/fwhezfwhez/errorx)
+[![Build Status]( https://www.travis-ci.org/fwhezfwhez/errorx.svg?branch=master)]( https://www.travis-ci.org/fwhezfwhez/errorx)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fwhezfwhez-errorx/community)
 
 a very convenient error handler.
 
