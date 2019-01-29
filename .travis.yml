@@ -10,7 +10,6 @@ sudo: false
 go_import_path: github.com/fwhezfwhez/errorx
 before_install:
   - go get github.com/fwhezfwhez/errorx
-  
 script:  
   - go run example/main.go
 notifications:
