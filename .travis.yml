@@ -1,0 +1,14 @@
+language: go
+go:
+  - 1.9.x
+  - 1.10.x
+  - 1.11.x
+env:
+  - GOARCH=amd64
+  - GOARCH=386
+sudo: false
+go_import_path: github.com/fwhezfwhez/errorx
+before_install:
+  - go get github.com/fwhezfwhez/errorx
+notifications:
+  email: false
