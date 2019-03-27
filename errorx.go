@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/fwhezfwhez/errorx"
 	"runtime"
 	"strings"
 	"time"
@@ -186,7 +185,7 @@ func NewWithParam(e error, params ... interface{}) error {
 	}
 	var errorMsg string
 	switch v := e.(type) {
-	case errorx.Error:
+	case Error:
 		errorMsg = fmt.Sprintf("\n" + strings.Join(v.StackTraces, "\n"))
 	case error:
 		errorMsg = fmt.Sprintf(v.Error())
