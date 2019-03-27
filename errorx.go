@@ -177,6 +177,9 @@ func NewFromStringf(format string, msg ... interface{}) error {
 
 // new a error from a error  with numeric params
 func NewWithParam(e error, params ... interface{}) error {
+	if len(params) == 0 {
+		return Wrap(e)
+	}
 	type ErrWithParam struct {
 		ErrMsg string      `json:"error"`
 		Params interface{} `json:"params"`
@@ -197,6 +200,9 @@ func NewWithParam(e error, params ... interface{}) error {
 	return NewFromString(fmt.Sprintf("%s", buf))
 }
 func NewFromStringWithParam(msg string, params ...interface{}) error {
+	if len(params) == 0 {
+		return NewFromString(msg)
+	}
 	type ErrWithParam struct {
 		ErrMsg string      `json:"error"`
 		Params interface{} `json:"params"`
