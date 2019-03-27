@@ -159,3 +159,7 @@ func TestErrorGroup(t *testing.T) {
 	e := GroupErrors(errors...)
 	fmt.Println(e)
 }
+
+func TestNewFromParam(t *testing.T) {
+	fmt.Println(NewFromStringWithParam("no record found", struct{Name string}{"ft"}, struct{Age int} {9}).Error())
+}

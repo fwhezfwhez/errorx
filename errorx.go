@@ -1,8 +1,10 @@
 package errorx
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/fwhezfwhez/errorx"
 	"runtime"
 	"strings"
 	"time"
@@ -36,7 +38,7 @@ type Error struct {
 	Flag        int
 }
 
-func (e Error) String() string{
+func (e Error) String() string {
 	return e.StackTraceValue()
 }
 
@@ -119,11 +121,12 @@ func (e Error) StackTraceValue() string {
 		header = append(header, "CauseBy")
 	}
 	headerStr := strings.Join(header, " | ")
-	rs := make([]string, 0,len(e.StackTraces)+1)
-	rs = append(rs,headerStr)
-	rs = append(rs,e.StackTraces...)
+	rs := make([]string, 0, len(e.StackTraces)+1)
+	rs = append(rs, headerStr)
+	rs = append(rs, e.StackTraces...)
 	return strings.Join(rs, "\n")
 }
+
 // wrap an official error to Error type
 // function do the same as New()
 // New() or Wrap() depends on its semantics. mixing them is also correct.
@@ -172,6 +175,40 @@ func NewFromStringf(format string, msg ... interface{}) error {
 	return NewFromString(fmt.Sprintf(format, msg...))
 }
 
+// new a error from a error  with numeric params
+func NewWithParam(e error, params ... interface{}) error {
+	type ErrWithParam struct {
+		ErrMsg string      `json:"error"`
+		Params interface{} `json:"params"`
+	}
+	var errorMsg string
+	switch v := e.(type) {
+	case errorx.Error:
+		errorMsg = fmt.Sprintf("\n" + strings.Join(v.StackTraces, "\n"))
+	case error:
+		errorMsg = fmt.Sprintf(v.Error())
+	}
+
+	// record param
+	ep := ErrWithParam{}
+	ep.ErrMsg = errorMsg
+	ep.Params = params
+	buf, _ := json.MarshalIndent(ep, "", "  ")
+	return NewFromString(fmt.Sprintf("%s", buf))
+}
+func NewFromStringWithParam(msg string, params ...interface{}) error {
+	type ErrWithParam struct {
+		ErrMsg string      `json:"error"`
+		Params interface{} `json:"params"`
+	}
+	// record param
+	ep := ErrWithParam{}
+	ep.ErrMsg = msg
+	ep.Params = params
+	buf, _ := json.MarshalIndent(ep, "", "  ")
+	return NewFromString(fmt.Sprintf("%s", buf))
+}
+
 // group series of error to a single error
 func GroupErrors(errors ...error) error {
 	var tmp error
@@ -183,9 +220,9 @@ func GroupErrors(errors ...error) error {
 
 	for i, e := range errors {
 		tmp = New(e)
-		stackTrace = append(stackTrace, fmt.Sprintf("\n##### error_%d #####",i))
+		stackTrace = append(stackTrace, fmt.Sprintf("\n##### error_%d #####", i))
 		stackTrace = append(stackTrace, tmp.(Error).StackTraces...)
-		stackTrace = append(stackTrace, fmt.Sprintf("##### /error_%d #####",i))
+		stackTrace = append(stackTrace, fmt.Sprintf("##### /error_%d #####", i))
 	}
 	return NewFromStackTrace(stackTrace, "an error bunch")
 }
