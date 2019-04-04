@@ -35,6 +35,7 @@ type Error struct {
 	ReGenerated bool
 	Errors      []error
 	Flag        int
+	Keyword     string
 }
 
 func (e Error) String() string {
@@ -297,3 +298,63 @@ func PrintStackFormat(flag int, file string, line int, cause string) string {
 	}
 	return fmt.Sprintf(strings.Join(formatGroup, " | "), formatArgs...)
 }
+
+// generate an error key word.
+// key word is used to help save errors in database
+// It's suggested to set unique(date, keyword), when error with same keyword in a day,database only saves field 'times'
+// rather than another error record
+func (e Error) GenerateKeyword() string {
+	arr := strings.Split((e).StackTraces[len(e.StackTraces)-1], "|")
+	core := strings.TrimSpace(arr[len(arr)-1])
+    return  generateKeyWord(core)
+}
+
+// generate key word to an error type
+func GenerateKeyword(e error) string {
+	switch v:=e.(type) {
+	case Error:
+		return  v.GenerateKeyword()
+	case error:
+		return generateKeyWord(e.Error())
+	}
+	return generateKeyWord(e.Error())
+}
+// generate key word ruled:
+// time out from mysql database     -> tofmd
+// connection panic from exception  -> cpfe
+func generateKeyWord(in string) string{
+	arr :=Split(in, " ")
+	var result string
+	for _,v:=range arr {
+		result += string(v[0])
+	}
+	return result
+}
+
+// Split better strings.Split，对  a,,,,,,,b,,c     以","进行切割成[a,b,c]
+func Split(s string, sub string) []string {
+	var rs = make([]string, 0, 20)
+	tmp := ""
+	Split2(s, sub, &tmp, &rs)
+	return rs
+}
+
+// Split2 附属于Split，可独立使用
+func Split2(s string, sub string, tmp *string, rs *[]string) {
+	s = strings.Trim(s, sub)
+	if !strings.Contains(s, sub) {
+		*tmp = s
+		*rs = append(*rs, *tmp)
+		return
+	}
+	for i := range s {
+		if string(s[i]) == sub {
+			*tmp = s[:i]
+			*rs = append(*rs, *tmp)
+			s = s[i+1:]
+			Split2(s, sub, tmp, rs)
+			return
+		}
+	}
+}
+
