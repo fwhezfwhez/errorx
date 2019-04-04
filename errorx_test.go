@@ -163,3 +163,30 @@ func TestErrorGroup(t *testing.T) {
 func TestNewFromParam(t *testing.T) {
 	fmt.Println(NewFromStringWithParam("no record found", struct{Name string}{"ft"}, struct{Age int} {9}).Error())
 }
+
+
+func TestError_GenerateKeyword(t *testing.T) {
+	result := generateKeyWord("hello kitty beautiful")
+	fmt.Println(result)
+	if result != "hkb" {
+		t.Fail()
+		return
+	}
+	result = generateKeyWord("  hello    kitty   beautiful   ")
+	fmt.Println(result)
+	if result != "hkb" {
+		t.Fail()
+		return
+	}
+
+	e := NewFromString("time out from mysql")
+	// result = e.(Error).GenerateKeyword()
+	result = GenerateKeyword(e)
+
+	fmt.Println(result)
+	if result != "tofm" {
+		t.Fail()
+		return
+	}
+
+}
