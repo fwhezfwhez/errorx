@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -31,6 +33,8 @@ type Error struct {
 	E           error
 	StackTraces []string
 	Context     map[string]interface{}
+	Header      map[string][]string
+
 	// upper
 	ReGenerated bool
 	Errors      []error
@@ -39,9 +43,35 @@ type Error struct {
 }
 
 func (e Error) String() string {
-	return e.StackTraceValue()
+	return e.Error()
 }
 
+// set header for an error obj
+// SetHeader is safe whether e.Header is nil or not
+func (e *Error) SetHeader(key string, value string) {
+	if e.Header == nil {
+		e.Header = make(map[string][]string, 0)
+	}
+	if e.Header[key] == nil {
+		e.Header[key] = make([]string, 0, 10)
+	}
+	if len(e.Header[key]) == 0 {
+		e.Header[key] = append(e.Header[key], value)
+	} else {
+		e.Header[key][0] = value
+	}
+}
+
+// GetHeader is safe wheter header is nil
+func (e Error) GetHeader(key string) string {
+	if e.Header == nil {
+		return ""
+	}
+	if e.Header[key] == nil || len(e.Header[key]) == 0 {
+		return ""
+	}
+	return e.Header[key][0]
+}
 func Empty() Error {
 	return Error{
 		E:           nil,
@@ -54,7 +84,13 @@ func Empty() Error {
 }
 
 func (e Error) Error() string {
-	return e.StackTraceValue()
+	var header = ""
+	if len(e.Header) != 0 {
+		buf, _ := json.MarshalIndent(e.Header, "  ", "  ")
+		header = fmt.Sprintf("header:\n%s\n", buf)
+	}
+	rs := fmt.Sprintf("%s%s\n", header, e.StackTraceValue())
+	return rs
 }
 
 // return its stacktrace
@@ -64,6 +100,22 @@ func (e Error) StackTrace() string {
 		rs = rs + v + "\n"
 	}
 	return rs
+}
+
+// New an error with header info
+func NewWithHeader(e error, header map[string]interface{}) error{
+	er := New(e).(Error)
+	for k,v:=range header{
+		er.SetHeader(k,ToString(v))
+	}
+	return er
+}
+
+func NewWithAttach(e error, msg interface{})error{
+    msg =ToString(msg)
+	er:=New(e).(Error)
+	er.SetHeader("attach", msg.(string))
+	return er
 }
 
 // New a error
@@ -149,7 +201,7 @@ func Wrap(e error) error {
 	return Wrap(errors.New("invalid error type,error type should be official or errorx.Error"))
 }
 
-// new a error from string
+// new an error from string
 func NewFromString(msg string) error {
 	e := errors.New(msg)
 	switch v := e.(type) {
@@ -169,11 +221,42 @@ func NewFromString(msg string) error {
 	}
 	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
 }
+// new an error from string with header
+func NewFromStringWithHeader(msg string, header map[string]interface{}) error {
+	er:= NewFromString(msg).(Error)
+	for k,v :=range header{
+		er.SetHeader(k,ToString(v))
+	}
+	return er
+}
+// new a error from a well format string with header
+func NewFromStringWithHeaderf(format string ,msg string, header map[string]interface{})error {
+	er:= NewFromStringf(format,msg).(Error)
+	for k,v :=range header{
+		er.SetHeader(k,ToString(v))
+	}
+	return er
+}
+
+// new an error from string with header
+func NewFromStringWithAttach(msg string, attach interface{}) error {
+	er:= NewFromString(msg).(Error)
+    er.SetHeader("attach",ToString(attach))
+	return er
+}
+
+// new an error from  well format string with header
+func NewFromStringWithAttachf(format string, msg string, attach interface{}) error {
+	er:= NewFromStringf(format, msg).(Error)
+	er.SetHeader("attach",ToString(attach))
+	return er
+}
 
 // new a error from a well format string
 func NewFromStringf(format string, msg ... interface{}) error {
 	return NewFromString(fmt.Sprintf(format, msg...))
 }
+
 
 // new a error from a error  with numeric params
 func NewWithParam(e error, params ... interface{}) error {
@@ -306,26 +389,27 @@ func PrintStackFormat(flag int, file string, line int, cause string) string {
 func (e Error) GenerateKeyword() string {
 	arr := strings.Split((e).StackTraces[len(e.StackTraces)-1], "|")
 	core := strings.TrimSpace(arr[len(arr)-1])
-    return  generateKeyWord(core)
+	return generateKeyWord(core)
 }
 
 // generate key word to an error type
 func GenerateKeyword(e error) string {
-	switch v:=e.(type) {
+	switch v := e.(type) {
 	case Error:
-		return  v.GenerateKeyword()
+		return v.GenerateKeyword()
 	case error:
 		return generateKeyWord(e.Error())
 	}
 	return generateKeyWord(e.Error())
 }
+
 // generate key word ruled:
 // time out from mysql database     -> tofmd
 // connection panic from exception  -> cpfe
-func generateKeyWord(in string) string{
-	arr :=Split(in, " ")
+func generateKeyWord(in string) string {
+	arr := Split(in, " ")
 	var result string
-	for _,v:=range arr {
+	for _, v := range arr {
 		result += string(v[0])
 	}
 	return result
@@ -358,3 +442,30 @@ func Split2(s string, sub string, tmp *string, rs *[]string) {
 	}
 }
 
+func ToString(arg interface{}) string {
+	tmp := reflect.Indirect(reflect.ValueOf(arg)).Interface()
+	switch v := tmp.(type) {
+	case int:
+		return strconv.Itoa(v)
+	case int8:
+		return strconv.FormatInt(int64(v), 10)
+	case int16:
+		return strconv.FormatInt(int64(v), 10)
+	case int32:
+		return strconv.FormatInt(int64(v), 10)
+	case int64:
+		return strconv.FormatInt(v, 10)
+	case string:
+		return v
+	case float32:
+		return strconv.FormatFloat(float64(v), 'f', -1, 32)
+	case float64:
+		return strconv.FormatFloat(v, 'f', -1, 64)
+	case time.Time:
+		return v.Format("2006-01-02 15:04:05")
+	case fmt.Stringer:
+		return v.String()
+	default:
+		return ""
+	}
+}
