@@ -3,6 +3,7 @@ package errorx
 import (
 	"errors"
 	"fmt"
+	"runtime/debug"
 	"testing"
 )
 
@@ -192,25 +193,31 @@ func TestError_GenerateKeyword(t *testing.T) {
 }
 
 func TestHeader(t *testing.T) {
-     er:= NewWithHeader(NewFromString("mysql time out"), map[string]interface{}{
-     	"api": "/game/pay/order",
-     	"user_id": 330392,
-	 })
-     fmt.Println(er.Error())
-
-	er = NewWithAttach(NewFromString("mysql time out"), "/game/pay/order")
+	fmt.Println(Wrap(nil))
+    // er:= NewWithHeader(NewFromString("mysql time out"), map[string]interface{}{
+    // 	"api": "/game/pay/order",
+    // 	"user_id": 330392,
+	// })
+    // fmt.Println(er.Error())
+	//
+	er := NewWithAttach(NewFromString("mysql time out"), string(debug.Stack()))
 	fmt.Println(er.Error())
 
-	er = NewFromStringWithHeaderf("user_id '%s' server error", "30939", map[string]interface{}{
-		"api":"/game/pay/order/",
-	})
-	fmt.Println(er.Error())
-
-	er = NewFromStringWithHeader("user_id '30939' server error", map[string]interface{}{
-		"api":"/game/pay/order/",
-	})
-	fmt.Println(er.Error())
-
-	er = NewFromStringWithAttach("user_id '30939' server error", "test")
-	fmt.Println(er.Error())
+	//er = NewFromStringWithHeaderf("user_id '%s' server error", "30939", map[string]interface{}{
+	//	"api":"/game/pay/order/",
+	//})
+	//fmt.Println(er.Error())
+	//
+	//er = NewFromStringWithHeader("user_id '30939' server error", map[string]interface{}{
+	//	"api":"/game/pay/order/",
+	//})
+	////fmt.Println(er.Error())
+	//
+	////er = NewFromStringWithAttach("user_id '30939' server error", "test")
+	////fmt.Println(er.Error())
+	//
+	//er = NewWithHeader(er, map[string]interface{}{
+	//	"req": "111",
+	//})
+	//fmt.Println(er.Error())
 }

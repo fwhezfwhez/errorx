@@ -103,23 +103,34 @@ func (e Error) StackTrace() string {
 }
 
 // New an error with header info
-func NewWithHeader(e error, header map[string]interface{}) error{
+func NewWithHeader(e error, header map[string]interface{}) error {
+	if e == nil {
+		return nil
+	}
+
 	er := New(e).(Error)
-	for k,v:=range header{
-		er.SetHeader(k,ToString(v))
+	for k, v := range header {
+		er.SetHeader(k, ToString(v))
 	}
 	return er
 }
 
-func NewWithAttach(e error, msg interface{})error{
-    msg =ToString(msg)
-	er:=New(e).(Error)
+func NewWithAttach(e error, msg interface{}) error {
+	if e == nil {
+		return nil
+	}
+
+	msg = ToString(msg)
+	er := New(e).(Error)
 	er.SetHeader("attach", msg.(string))
 	return er
 }
 
 // New a error
 func New(e error) error {
+	if e == nil {
+		return nil
+	}
 	switch v := e.(type) {
 	case Error:
 		_, file, line, _ := runtime.Caller(1)
@@ -183,6 +194,9 @@ func (e Error) StackTraceValue() string {
 // function do the same as New()
 // New() or Wrap() depends on its semantics. mixing them is also correct.
 func Wrap(e error) error {
+	if e == nil {
+		return nil
+	}
 	switch v := e.(type) {
 	case Error:
 		_, file, line, _ := runtime.Caller(1)
@@ -221,34 +235,36 @@ func NewFromString(msg string) error {
 	}
 	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
 }
+
 // new an error from string with header
 func NewFromStringWithHeader(msg string, header map[string]interface{}) error {
-	er:= NewFromString(msg).(Error)
-	for k,v :=range header{
-		er.SetHeader(k,ToString(v))
+	er := NewFromString(msg).(Error)
+	for k, v := range header {
+		er.SetHeader(k, ToString(v))
 	}
 	return er
 }
+
 // new a error from a well format string with header
-func NewFromStringWithHeaderf(format string ,msg string, header map[string]interface{})error {
-	er:= NewFromStringf(format,msg).(Error)
-	for k,v :=range header{
-		er.SetHeader(k,ToString(v))
+func NewFromStringWithHeaderf(format string, msg string, header map[string]interface{}) error {
+	er := NewFromStringf(format, msg).(Error)
+	for k, v := range header {
+		er.SetHeader(k, ToString(v))
 	}
 	return er
 }
 
 // new an error from string with header
 func NewFromStringWithAttach(msg string, attach interface{}) error {
-	er:= NewFromString(msg).(Error)
-    er.SetHeader("attach",ToString(attach))
+	er := NewFromString(msg).(Error)
+	er.SetHeader("attach", ToString(attach))
 	return er
 }
 
 // new an error from  well format string with header
 func NewFromStringWithAttachf(format string, msg string, attach interface{}) error {
-	er:= NewFromStringf(format, msg).(Error)
-	er.SetHeader("attach",ToString(attach))
+	er := NewFromStringf(format, msg).(Error)
+	er.SetHeader("attach", ToString(attach))
 	return er
 }
 
@@ -257,9 +273,12 @@ func NewFromStringf(format string, msg ... interface{}) error {
 	return NewFromString(fmt.Sprintf(format, msg...))
 }
 
-
 // new a error from a error  with numeric params
 func NewWithParam(e error, params ... interface{}) error {
+	if e == nil {
+		return nil
+	}
+
 	if len(params) == 0 {
 		return Wrap(e)
 	}
@@ -308,6 +327,9 @@ func GroupErrors(errors ...error) error {
 	}()
 
 	for i, e := range errors {
+		if e == nil {
+			continue
+		}
 		tmp = New(e)
 		stackTrace = append(stackTrace, fmt.Sprintf("\n##### error_%d #####", i))
 		stackTrace = append(stackTrace, tmp.(Error).StackTraces...)
