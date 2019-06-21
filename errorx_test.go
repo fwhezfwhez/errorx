@@ -221,3 +221,8 @@ func TestHeader(t *testing.T) {
 	//})
 	//fmt.Println(er.Error())
 }
+
+func TestMMM(t *testing.T) {
+	// Wrap(Wrap(errors.New("hello"))).(Error).PrintStackTrace()
+	fmt.Println(NewWithAttach(NewFromString("hello"), "attach"))
+}

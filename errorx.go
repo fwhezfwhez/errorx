@@ -92,6 +92,12 @@ func (e Error) Error() string {
 	rs := fmt.Sprintf("%s%s\n", header, e.StackTraceValue())
 	return rs
 }
+func (e Error) BasicError() string {
+	if e.E!=nil{
+		return e.E.Error()
+	}
+	return ""
+}
 
 // return its stacktrace
 func (e Error) StackTrace() string {
@@ -134,7 +140,7 @@ func New(e error) error {
 	switch v := e.(type) {
 	case Error:
 		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(v.Flag, file, line, v.Error())
+		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
 		v.StackTraces = append(v.StackTraces, trace)
 		return v
 	case error:
@@ -154,17 +160,17 @@ func New(e error) error {
 // e.Flag only controls 'Error' type or official error which has been wrapped to 'Error'.
 // e.Flag only controls stack trace inner an Error type ,rather than some stack trace which has been init by api NewFromStackTrace([]string,string)
 func (e Error) PrintStackTrace() string {
-	header := make([]string, 0, 10)
-	if e.Flag&LdateTime > 0 {
-		header = append(header, "HappenAt")
-	}
-	if e.Flag&Llongfile > 0 {
-		header = append(header, "StackTrace")
-	}
-	if e.Flag&LcauseBy > 0 {
-		header = append(header, "CauseBy")
-	}
-	fmt.Println(strings.Join(header, " | "))
+	//header := make([]string, 0, 10)
+	//if e.Flag&LdateTime > 0 {
+	//	header = append(header, "HappenAt")
+	//}
+	//if e.Flag&Llongfile > 0 {
+	//	header = append(header, "StackTrace")
+	//}
+	//if e.Flag&LcauseBy > 0 {
+	//	header = append(header, "CauseBy")
+	//}
+	//fmt.Println(strings.Join(header, " | "))
 
 	for _, v := range e.StackTraces {
 		fmt.Println(v)
@@ -173,19 +179,19 @@ func (e Error) PrintStackTrace() string {
 }
 
 func (e Error) StackTraceValue() string {
-	header := make([]string, 0, 10)
-	if e.Flag&LdateTime > 0 {
-		header = append(header, "HappenAt")
-	}
-	if e.Flag&Llongfile > 0 {
-		header = append(header, "StackTrace")
-	}
-	if e.Flag&LcauseBy > 0 {
-		header = append(header, "CauseBy")
-	}
-	headerStr := strings.Join(header, " | ")
+	//header := make([]string, 0, 10)
+	//if e.Flag&LdateTime > 0 {
+	//	header = append(header, "HappenAt")
+	//}
+	//if e.Flag&Llongfile > 0 {
+	//	header = append(header, "StackTrace")
+	//}
+	//if e.Flag&LcauseBy > 0 {
+	//	header = append(header, "CauseBy")
+	//}
+	//headerStr := strings.Join(header, " | ")
 	rs := make([]string, 0, len(e.StackTraces)+1)
-	rs = append(rs, headerStr)
+	// rs = append(rs, headerStr)
 	rs = append(rs, e.StackTraces...)
 	return strings.Join(rs, "\n")
 }
@@ -200,7 +206,7 @@ func Wrap(e error) error {
 	switch v := e.(type) {
 	case Error:
 		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(v.Flag, file, line, v.Error())
+		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
 		v.StackTraces = append(v.StackTraces, trace)
 		return v
 	case error:
@@ -221,7 +227,7 @@ func NewFromString(msg string) error {
 	switch v := e.(type) {
 	case Error:
 		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(v.Flag, file, line, v.Error())
+		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
 		v.StackTraces = append(v.StackTraces, trace)
 		return v
 	case error:
