@@ -162,9 +162,8 @@ func TestErrorGroup(t *testing.T) {
 }
 
 func TestNewFromParam(t *testing.T) {
-	fmt.Println(NewFromStringWithParam("no record found", struct{Name string}{"ft"}, struct{Age int} {9}).Error())
+	fmt.Println(NewFromStringWithParam("no record found", struct{ Name string }{"ft"}, struct{ Age int }{9}).Error())
 }
-
 
 func TestError_GenerateKeyword(t *testing.T) {
 	result := generateKeyWord("hello kitty beautiful")
@@ -194,11 +193,11 @@ func TestError_GenerateKeyword(t *testing.T) {
 
 func TestHeader(t *testing.T) {
 	fmt.Println(Wrap(nil))
-    // er:= NewWithHeader(NewFromString("mysql time out"), map[string]interface{}{
-    // 	"api": "/game/pay/order",
-    // 	"user_id": 330392,
+	// er:= NewWithHeader(NewFromString("mysql time out"), map[string]interface{}{
+	// 	"api": "/game/pay/order",
+	// 	"user_id": 330392,
 	// })
-    // fmt.Println(er.Error())
+	// fmt.Println(er.Error())
 	//
 	er := NewWithAttach(NewFromString("mysql time out"), string(debug.Stack()))
 	fmt.Println(er.Error())
@@ -225,4 +224,9 @@ func TestHeader(t *testing.T) {
 func TestMMM(t *testing.T) {
 	// Wrap(Wrap(errors.New("hello"))).(Error).PrintStackTrace()
 	fmt.Println(NewWithAttach(NewFromString("hello"), "attach"))
+}
+
+func TestWrap(t *testing.T) {
+	e := fmt.Errorf("nil return")
+	fmt.Println(Wrap(Wrap(e)).Error())
 }

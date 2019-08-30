@@ -71,6 +71,7 @@ func (ec *ErrorCollection) Add(e error) {
 	}()
 }
 
+
 // This is a self design  function to handle the inner errors collected via a single handler typed 'ErrorHandler'
 func (ec *ErrorCollection) Handle(f ErrorHandler) {
 	ec.M.Lock()

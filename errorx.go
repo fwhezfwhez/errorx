@@ -32,6 +32,8 @@ type Error struct {
 	// basic
 	E           error
 	StackTraces []string
+
+	// do not use context, it's tracking bug on development
 	Context     map[string]interface{}
 	Header      map[string][]string
 
