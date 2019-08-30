@@ -19,12 +19,11 @@ a very convenient error handler.
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## 1. What is different from the officials
-| property | info | example | error | errorx |
-|:----------- | :---- |:------|:-------------:|--:|
-| Error() | what the error really is  | password wrong | yes | yes |
-| StackTrace() | where the error went through| file.go :32 password wrong| no | yes |
-| ReGen() | covering the real cause and return new error|  real_cause: time out -> user_view:inner service error | no | yes|
-| errorChain | an error can be handled by handlers | | no | yes|
+
+- Supporting generate error stacktrace, locating more efficiently than runtime stacktrace.
+- Supporting report error to HTTP URL.
+- Supporting generate json-marshalled error detail for outer pipeline.
+- Supporting differrent mode uses different error handlers.
 
 ## 2. Start
 `go get github.com/fwhezfwhez/errorx`
