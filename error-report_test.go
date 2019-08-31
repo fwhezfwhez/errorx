@@ -49,3 +49,29 @@ func TestReporter(t *testing.T) {
 	})
 	time.Sleep(10 * time.Second)
 }
+
+func TestReporter_JSONIndent_JSON(t *testing.T) {
+	rp := NewReporter()
+
+	eUuid, buf, e := rp.JSON(NewFromString("nil return"), map[string]interface{}{
+		"api": "/xx/xxx/xx",
+	})
+	if e != nil {
+		fmt.Println(e.Error())
+		t.Fail()
+		return
+	}
+	fmt.Println(eUuid)
+	fmt.Println(string(buf))
+
+	eUuid, buf, e = rp.JSONIndent(NewFromString("nil return"), map[string]interface{}{
+		"api": "/xx/xxx/xx",
+	}, "  ", "  ")
+	if e != nil {
+		fmt.Println(e.Error())
+		t.Fail()
+		return
+	}
+	fmt.Println(eUuid)
+	fmt.Println(string(buf))
+}

@@ -39,6 +39,7 @@ type Reporter struct {
 	l2 sync.RWMutex
 }
 
+// rp.Mode related, should call like rp.Mode("dev").ReportURLHandler
 // It will post error with context to an url storaged in reporter.Url
 func (r Reporter) ReportURLHandler(e error, context map[string]interface{}) {
 	var tmp = make(map[string]interface{}, 0)
@@ -114,6 +115,7 @@ func (r *Reporter) AddModeHandler(mode string, f func(e error, context map[strin
 	return r
 }
 
+// rp.Mode related, should call as r.Mode("dev").SaveError()
 func (r Reporter) SaveError(e error, context map[string]interface{}) string {
 L:
 	switch v := e.(type) {
@@ -144,4 +146,60 @@ L:
 	handler(Wrap(e), context)
 
 	return errorUUID
+}
+
+// rp.Mode unrelated
+// returns errorUUID, json-buf, error
+func (r Reporter) JSON(e error, context map[string]interface{}) (string, []byte, error) {
+L:
+	switch v := e.(type) {
+	case Error:
+		break L
+	case error:
+		return r.JSON(NewFromString(string(fmt.Sprintf("err '%s' \n %s", v.Error(), debug.Stack()))), context)
+	}
+
+	if context == nil {
+		context = make(map[string]interface{}, 0)
+	}
+
+	var tmp = make(map[string]interface{}, 0)
+
+	u, _ := uuid.NewV4()
+	errUUID := u.String()
+	tmp["error_uuid"] = errUUID
+	tmp["message"] = Wrap(e).Error()
+	tmp["context"] = context
+	buf, e := json.Marshal(tmp)
+	if e != nil {
+		return "", nil, Wrap(e)
+	}
+	return errUUID, buf, nil
+}
+
+func (r Reporter) JSONIndent(e error, context map[string]interface{}, prefix, indent string) (string, []byte, error) {
+L:
+	switch v := e.(type) {
+	case Error:
+		break L
+	case error:
+		return r.JSON(NewFromString(string(fmt.Sprintf("err '%s' \n %s", v.Error(), debug.Stack()))), context)
+	}
+
+	if context == nil {
+		context = make(map[string]interface{}, 0)
+	}
+
+	var tmp = make(map[string]interface{}, 0)
+
+	u, _ := uuid.NewV4()
+	errUUID := u.String()
+	tmp["error_uuid"] = errUUID
+	tmp["message"] = Wrap(e).Error()
+	tmp["context"] = context
+	buf, e := json.MarshalIndent(tmp, prefix, indent)
+	if e != nil {
+		return "", nil, Wrap(e)
+	}
+	return errUUID, buf, nil
 }
