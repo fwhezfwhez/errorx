@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/fwhezfwhez/errorx"
 	"github.com/satori/go.uuid"
 	"net/http"
 	"runtime/debug"
@@ -40,20 +39,20 @@ func (r Reporter) ReportURLHandler(e error, context map[string]interface{}) {
 	buf, er := json.MarshalIndent(context, "  ", "  ")
 	if er != nil {
 		context["reporter"] = er.Error()
-		DefaultHandler(errorx.Wrap(e), context)
+		DefaultHandler(Wrap(e), context)
 		return
 	}
 	req, er := http.NewRequest("POST", r.Url[r.mode], bytes.NewReader(buf))
 	req.Header.Set("Content-Type", "application/json")
 	if er != nil {
 		context["reporter"] = er.Error()
-		DefaultHandler(errorx.Wrap(e), context)
+		DefaultHandler(Wrap(e), context)
 		return
 	}
 	resp, er := r.c.Do(req)
 	if er != nil {
 		context["reporter"] = er.Error()
-		DefaultHandler(errorx.Wrap(e), context)
+		DefaultHandler(Wrap(e), context)
 		return
 	}
 	if resp != nil && resp.Body != nil {
@@ -129,8 +128,8 @@ L:
 	u, _ := uuid.NewV4()
 	errorUUID := u.String()
 	context["error_uuid"] = errorUUID
-	context["message"] = errorx.Wrap(e).Error()
-	handler(errorx.Wrap(e), context)
+	context["message"] = Wrap(e).Error()
+	handler(Wrap(e), context)
 
 	return errorUUID
 }
