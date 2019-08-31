@@ -13,9 +13,15 @@ import (
 
 // It will fmt error log into console.
 var DefaultHandler = func(e error, context map[string]interface{}) {
+	var tmp = make(map[string]interface{}, 0)
+	tmp["error_uuid"] = context["error_uuid"]
+	delete(context, "error_uuid")
+	tmp["message"] = Wrap(e).Error()
+	tmp["context"] = context
+
 	var buf = []byte("")
 	var er error
-	buf, er = json.MarshalIndent(context, "  ", "  ")
+	buf, er = json.MarshalIndent(tmp, "  ", "  ")
 	if er != nil {
 		buf = []byte(Wrap(er).Error())
 	}
@@ -35,8 +41,15 @@ type Reporter struct {
 
 // It will post error with context to an url storaged in reporter.Url
 func (r Reporter) ReportURLHandler(e error, context map[string]interface{}) {
-	context["message"] = Wrap(e).Error()
-	buf, er := json.MarshalIndent(context, "  ", "  ")
+	var tmp = make(map[string]interface{}, 0)
+
+	tmp["error_uuid"] = context["error_uuid"]
+	delete(context, "error_uuid")
+
+	tmp["message"] = Wrap(e).Error()
+	tmp["context"] = context
+
+	buf, er := json.MarshalIndent(tmp, "  ", "  ")
 	if er != nil {
 		context["reporter"] = er.Error()
 		DefaultHandler(Wrap(e), context)
@@ -128,7 +141,6 @@ L:
 	u, _ := uuid.NewV4()
 	errorUUID := u.String()
 	context["error_uuid"] = errorUUID
-	context["message"] = Wrap(e).Error()
 	handler(Wrap(e), context)
 
 	return errorUUID

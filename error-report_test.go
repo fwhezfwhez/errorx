@@ -35,12 +35,14 @@ func TestReporter(t *testing.T) {
 
 	<-serverStart
 	rp := NewReporter()
-	rp.AddURL("dev", "http://localhost:8196").AddURL("pro", "http://localhost:8197")
-	rp.AddModeHandler("dev", DefaultHandler).AddModeHandler("pro", rp.Mode("pro").ReportURLHandler)
+	rp.AddURL("dev", "http://localhost:8196").
+		AddURL("pro", "http://localhost:8197")
+	rp.AddModeHandler("dev", DefaultHandler).
+		AddModeHandler("pro", rp.Mode("pro").ReportURLHandler)
 
-	//_ = rp.Mode("dev").SaveError(errors.New("nil return"), map[string]interface{}{
-	//	"api": "/xxx/yyy/",
-	//})
+	_ = rp.Mode("dev").SaveError(errors.New("nil return"), map[string]interface{}{
+		"api": "/xxx/yyy/",
+	})
 
 	go rp.Mode("pro").SaveError(errors.New("nil return"), map[string]interface{}{
 		"api": "/xxx/yyy/",

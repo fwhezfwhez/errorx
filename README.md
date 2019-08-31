@@ -85,10 +85,11 @@ func main() {
 output:
 ```go
 {
-    "message": "2019-08-30 18:02:53 | G:/go_workspace/GOPATH/src/errorX/error-report.go: 24 | 2019-08-30 18:02:53 | G:/go_workspace/GOPATH/src/errorX/error-report.go: 134 | 2019-08-30 18:02:53 | G:/go_workspace/GOPATH/src/test_X/tmp/main.go: 17 | nil return",
-    "age": 1,
-    "error_uuid": "0ad565cd-7fb3-4ee9-bbc7-db3abcd0aebb",
-    "username": "errorx"
+    "context": {
+      "api": "/xxx/yyy/"
+    },
+    "error_uuid": "11d35e60-5abc-462d-9df1-bb5b01d79807",
+    "message": "2019-08-31 08:58:29 | G:/go_workspace/GOPATH/src/errorX/error-report.go: 123 | err 'nil return' \n goroutine 51 [running]:\nruntime/debug.Stack(0xc0002022e0, 0xb3604d, 0xa)\n\tE:/go1.12/src/runtime/debug/stack.go:24 +0xa4\nerrorX.Reporter.SaveError(0xc0001fc1e0, 0xb30f5d, 0x3, 0xc0001fc180, 0x0, 0x0, 0x0, 0xc0001fc1b0, 0x0, 0x0, ...)\n\tG:/go_workspace/GOPATH/src/errorX/error-report.go:123 +0x30b\ncreated by errorX.TestReporter\n\tG:/go_workspace/GOPATH/src/errorX/error-report_test.go:45 +0x702\n\n2019-08-31 08:58:29 | G:/go_workspace/GOPATH/src/errorX/error-report.go: 144 | err 'nil return' \n goroutine 51 [running]:\nruntime/debug.Stack(0xc0002022e0, 0xb3604d, 0xa)\n\tE:/go1.12/src/runtime/debug/stack.go:24 +0xa4\nerrorX.Reporter.SaveError(0xc0001fc1e0, 0xb30f5d, 0x3, 0xc0001fc180, 0x0, 0x0, 0x0, 0xc0001fc1b0, 0x0, 0x0, ...)\n\tG:/go_workspace/GOPATH/src/errorX/error-report.go:123 +0x30b\ncreated by errorX.TestReporter\n\tG:/go_workspace/GOPATH/src/errorX/error-report_test.go:45 +0x702\n\n2019-08-31 08:58:29 | G:/go_workspace/GOPATH/src/errorX/error-report.go: 49 | err 'nil return' \n goroutine 51 [running]:\nruntime/debug.Stack(0xc0002022e0, 0xb3604d, 0xa)\n\tE:/go1.12/src/runtime/debug/stack.go:24 +0xa4\nerrorX.Reporter.SaveError(0xc0001fc1e0, 0xb30f5d, 0x3, 0xc0001fc180, 0x0, 0x0, 0x0, 0xc0001fc1b0, 0x0, 0x0, ...)\n\tG:/go_workspace/GOPATH/src/errorX/error-report.go:123 +0x30b\ncreated by errorX.TestReporter\n\tG:/go_workspace/GOPATH/src/errorX/error-report_test.go:45 +0x702\n\n"
 }
 ```
 
@@ -153,10 +154,12 @@ func main() {
 ```
 Output in server panel:
 ```
-Recv: {
-    "age": 1,
-    "error_uuid": "1fd36ad7-9529-441d-97f8-2f6cc7886aae",
-    "message": "2019-08-30 18:15:37 | G:/go_workspace/GOPATH/src/errorX/error-report.go: 39 | 2019-08-30 18:15:37 | G:/go_workspace/GOPATH/src/errorX/error-report.go: 133 | 2019-08-30 18:15:37 | G:/go_workspace/GOPATH/src/test_X/tmp/main.go: 18 | nil return\n\n\n",
-    "username": "errorx"
-  }
+Recv:
+{
+    "context": {
+      "api": "/xxx/yyy/"
+    },
+    "error_uuid": "11d35e60-5abc-462d-9df1-bb5b01d79807",
+    "message": "2019-08-31 08:58:29 | G:/go_workspace/GOPATH/src/errorX/error-report.go: 123 | err 'nil return' \n goroutine 51 [running]:\nruntime/debug.Stack(0xc0002022e0, 0xb3604d, 0xa)\n\tE:/go1.12/src/runtime/debug/stack.go:24 +0xa4\nerrorX.Reporter.SaveError(0xc0001fc1e0, 0xb30f5d, 0x3, 0xc0001fc180, 0x0, 0x0, 0x0, 0xc0001fc1b0, 0x0, 0x0, ...)\n\tG:/go_workspace/GOPATH/src/errorX/error-report.go:123 +0x30b\ncreated by errorX.TestReporter\n\tG:/go_workspace/GOPATH/src/errorX/error-report_test.go:45 +0x702\n\n2019-08-31 08:58:29 | G:/go_workspace/GOPATH/src/errorX/error-report.go: 144 | err 'nil return' \n goroutine 51 [running]:\nruntime/debug.Stack(0xc0002022e0, 0xb3604d, 0xa)\n\tE:/go1.12/src/runtime/debug/stack.go:24 +0xa4\nerrorX.Reporter.SaveError(0xc0001fc1e0, 0xb30f5d, 0x3, 0xc0001fc180, 0x0, 0x0, 0x0, 0xc0001fc1b0, 0x0, 0x0, ...)\n\tG:/go_workspace/GOPATH/src/errorX/error-report.go:123 +0x30b\ncreated by errorX.TestReporter\n\tG:/go_workspace/GOPATH/src/errorX/error-report_test.go:45 +0x702\n\n2019-08-31 08:58:29 | G:/go_workspace/GOPATH/src/errorX/error-report.go: 49 | err 'nil return' \n goroutine 51 [running]:\nruntime/debug.Stack(0xc0002022e0, 0xb3604d, 0xa)\n\tE:/go1.12/src/runtime/debug/stack.go:24 +0xa4\nerrorX.Reporter.SaveError(0xc0001fc1e0, 0xb30f5d, 0x3, 0xc0001fc180, 0x0, 0x0, 0x0, 0xc0001fc1b0, 0x0, 0x0, ...)\n\tG:/go_workspace/GOPATH/src/errorX/error-report.go:123 +0x30b\ncreated by errorX.TestReporter\n\tG:/go_workspace/GOPATH/src/errorX/error-report_test.go:45 +0x702\n\n"
+}
 ```
