@@ -34,8 +34,8 @@ type Error struct {
 	StackTraces []string
 
 	// do not use context, it's tracking bug on development
-	Context     map[string]interface{}
-	Header      map[string][]string
+	Context map[string]interface{}
+	Header  map[string][]string
 
 	// upper
 	ReGenerated bool
@@ -95,7 +95,7 @@ func (e Error) Error() string {
 	return rs
 }
 func (e Error) BasicError() string {
-	if e.E!=nil{
+	if e.E != nil {
 		return e.E.Error()
 	}
 	return ""
@@ -201,7 +201,7 @@ func (e Error) StackTraceValue() string {
 // wrap an official error to Error type
 // function do the same as New()
 // New() or Wrap() depends on its semantics. mixing them is also correct.
-func Wrap(e error) error {
+func wrap(e error) error {
 	if e == nil {
 		return nil
 	}
@@ -391,6 +391,10 @@ func MustWrap(e error) Error {
 		return New(v).(Error)
 	}
 	return Empty()
+}
+
+func Wrap(e error) error {
+	return wrap(e)
 }
 
 func PrintStackFormat(flag int, file string, line int, cause string) string {
