@@ -43,10 +43,12 @@ func TestReporter(t *testing.T) {
 	_ = rp.Mode("dev").SaveError(errors.New("nil return"), map[string]interface{}{
 		"api": "/xxx/yyy/",
 	})
+	_ = rp.Mode("dev").SaveError(errors.New("nil return"), nil)
 
 	go rp.Mode("pro").SaveError(errors.New("nil return"), map[string]interface{}{
 		"api": "/xxx/yyy/",
 	})
+	go rp.Mode("pro").SaveError(errors.New("nil return"), nil)
 	time.Sleep(10 * time.Second)
 }
 
@@ -74,4 +76,31 @@ func TestReporter_JSONIndent_JSON(t *testing.T) {
 	}
 	fmt.Println(eUuid)
 	fmt.Println(string(buf))
+}
+
+func TestNewReporterConcurrent(t *testing.T) {
+	var serverStart = make(chan int, 0)
+	go func() {
+		go startReportServer(":7123")
+		time.Sleep(2 * time.Second)
+		serverStart <- 1
+	}()
+
+	rp := NewReporter()
+	rp.AddURL("dev", "http://localhost:8196").
+		AddURL("pro", "http://localhost:7123")
+	rp.AddModeHandler("dev", DefaultHandler).
+		AddModeHandler("pro", rp.Mode("pro").ReportURLHandler)
+
+	<-serverStart
+	for i:=0;i<100;i++ {
+		go rp.Mode("dev").SaveError(errors.New("nil return"), map[string]interface{}{
+			"api": "/xxx/yyy/",
+		})
+
+		go rp.Mode("pro").SaveError(errors.New("nil return"), map[string]interface{}{
+			"api": "/xxx/yyy/",
+		})
+	}
+	time.Sleep(20 * time.Second)
 }
