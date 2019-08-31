@@ -178,9 +178,7 @@ import (
 )
 
 func main() {
-	rp := errorx.NewReporter()
-
-	eUuid, buf, e := rp.JSON(errorx.NewFromString("nil return"), map[string]interface{}{
+	eUuid, buf, e := errorx.JSON(errorx.NewFromString("nil return"), map[string]interface{}{
 		"api": "/xx/xxx/xx",
 	})
 	fmt.Println(eUuid)

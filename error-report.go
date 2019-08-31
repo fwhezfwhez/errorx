@@ -177,6 +177,33 @@ L:
 	return errUUID, buf, nil
 }
 
+func JSON(e error, context map[string]interface{}) (string, []byte, error) {
+L:
+	switch v := e.(type) {
+	case Error:
+		break L
+	case error:
+		return JSON(NewFromString(string(fmt.Sprintf("err '%s' \n %s", v.Error(), debug.Stack()))), context)
+	}
+
+	if context == nil {
+		context = make(map[string]interface{}, 0)
+	}
+
+	var tmp = make(map[string]interface{}, 0)
+
+	u, _ := uuid.NewV4()
+	errUUID := u.String()
+	tmp["error_uuid"] = errUUID
+	tmp["message"] = Wrap(e).Error()
+	tmp["context"] = context
+	buf, e := json.Marshal(tmp)
+	if e != nil {
+		return "", nil, Wrap(e)
+	}
+	return errUUID, buf, nil
+}
+
 func (r Reporter) JSONIndent(e error, context map[string]interface{}, prefix, indent string) (string, []byte, error) {
 L:
 	switch v := e.(type) {
@@ -184,6 +211,33 @@ L:
 		break L
 	case error:
 		return r.JSON(NewFromString(string(fmt.Sprintf("err '%s' \n %s", v.Error(), debug.Stack()))), context)
+	}
+
+	if context == nil {
+		context = make(map[string]interface{}, 0)
+	}
+
+	var tmp = make(map[string]interface{}, 0)
+
+	u, _ := uuid.NewV4()
+	errUUID := u.String()
+	tmp["error_uuid"] = errUUID
+	tmp["message"] = Wrap(e).Error()
+	tmp["context"] = context
+	buf, e := json.MarshalIndent(tmp, prefix, indent)
+	if e != nil {
+		return "", nil, Wrap(e)
+	}
+	return errUUID, buf, nil
+}
+
+func JSONIndent(e error, context map[string]interface{}, prefix, indent string) (string, []byte, error) {
+L:
+	switch v := e.(type) {
+	case Error:
+		break L
+	case error:
+		return JSON(NewFromString(string(fmt.Sprintf("err '%s' \n %s", v.Error(), debug.Stack()))), context)
 	}
 
 	if context == nil {
