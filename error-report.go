@@ -37,18 +37,38 @@ type Reporter struct {
 
 	HandleMode map[string]func(e error, context map[string]interface{})
 	l2 sync.RWMutex
+
+	renameOfContext string
+}
+
+func (r *Reporter) SetContextName(name string) {
+	r.renameOfContext = name
+}
+func (r *Reporter) SetMode(mode string) {
+	r.mode = mode
 }
 
 // rp.Mode related, should call like rp.Mode("dev").ReportURLHandler
 // It will post error with context to an url storaged in reporter.Url
 func (r Reporter) ReportURLHandler(e error, context map[string]interface{}) {
+	if r.mode == "" {
+		context["reporter"] = NewFromStringf("reporter mode empty, please call er.Mode('pro') first").Error()
+		DefaultHandler(NewFromStringf("reporter mode empty, please call er.Mode('pro') first"), context)
+		return
+	}
+
 	var tmp = make(map[string]interface{}, 0)
 
 	tmp["error_uuid"] = context["error_uuid"]
 	delete(context, "error_uuid")
 
 	tmp["message"] = Wrap(e).Error()
-	tmp["context"] = context
+
+	if r.renameOfContext != "" {
+		tmp[r.renameOfContext] = context
+	} else {
+		tmp["context"] = context
+	}
 
 	buf, er := json.MarshalIndent(tmp, "  ", "  ")
 	if er != nil {
@@ -74,11 +94,31 @@ func (r Reporter) ReportURLHandler(e error, context map[string]interface{}) {
 	}
 }
 
-func NewReporter() *Reporter {
+func (r Reporter) DefaultHandler(e error, context map[string]interface{}) {
+	var tmp = make(map[string]interface{}, 0)
+	tmp["error_uuid"] = context["error_uuid"]
+	delete(context, "error_uuid")
+	tmp["message"] = Wrap(e).Error()
+	if r.renameOfContext != "" {
+		tmp[r.renameOfContext] = context
+	} else {
+		tmp["context"] = context
+	}
+
+	var buf = []byte("")
+	var er error
+	buf, er = json.MarshalIndent(tmp, "  ", "  ")
+	if er != nil {
+		buf = []byte(Wrap(er).Error())
+	}
+	fmt.Println(string(buf))
+}
+
+func NewReporter(mode string) *Reporter {
 	return &Reporter{
 		c: &http.Client{Timeout: 15 * time.Second},
 
-		mode: "",
+		mode: mode,
 		Url:  make(map[string]string, 0),
 		HandleMode: make(map[string]func(e error, context map[string]interface{})),
 		l1: sync.RWMutex{},
@@ -95,6 +135,8 @@ func (r *Reporter) copy() *Reporter {
 		HandleMode: r.HandleMode,
 		l1:         r.l1,
 		l2:         r.l2,
+
+		renameOfContext: r.renameOfContext,
 	}
 	return clone
 }

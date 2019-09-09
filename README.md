@@ -68,13 +68,13 @@ import (
 var rp *errorx.Reporter
 
 func init() {
-	rp = errorx.NewReporter()
-	rp.AddModeHandler("dev", errorx.DefaultHandler)
+	rp = errorx.NewReporter("dev")
+	rp.AddModeHandler("dev", rp.DefaultHandler)
 }
 func main() {
 	e := fmt.Errorf("nil return")
 	if e != nil {
-		rp.Mode("dev").SaveError(errorx.Wrap(e), map[string]interface{}{
+		rp.SaveError(errorx.Wrap(e), map[string]interface{}{
 			"username": "errorx",
 			"age":      1,
 		})
@@ -136,17 +136,25 @@ import (
 var rp *errorx.Reporter
 
 func init() {
-	rp = errorx.NewReporter()
+	rp = errorx.NewReporter("pro")
 	rp.AddURL("pro", "http://localhost:9191")
-	rp.AddModeHandler("pro", rp.Mode("pro").ReportURLHandler)
+	rp.AddURL("dev", "http://localhost:9192")
+	rp.AddModeHandler("pro", rp.ReportURLHandler)
+	rp.AddModeHandler("dev", rp.Mode("dev").DefaultHandler)
 }
 func main() {
 	e := fmt.Errorf("nil return")
 	if e != nil {
-		_ = rp.Mode("pro").SaveError(errorx.Wrap(e), map[string]interface{}{
+	    // rp's mode is pro, it will send error to localhost:9191
+		_ = rp.SaveError(errorx.Wrap(e), map[string]interface{}{
 			"username": "errorx",
 			"age":      1,
 		})
+		// clone a rp and reset its mode to dev, it will print error in console by DefaultHandler
+        _ = rp.Mode("dev").SaveError(errorx.Wrap(e), map[string]interface{}{
+            "username": "errorx",
+            "age":      1,
+        })
 		return
 	}
 }

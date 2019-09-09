@@ -34,26 +34,27 @@ func TestReporter(t *testing.T) {
 	}()
 
 	<-serverStart
-	rp := NewReporter()
+	rp := NewReporter("pro")
+	rp.SetContextName("request")
 	rp.AddURL("dev", "http://localhost:8196").
 		AddURL("pro", "http://localhost:8197")
-	rp.AddModeHandler("dev", DefaultHandler).
-		AddModeHandler("pro", rp.Mode("pro").ReportURLHandler)
+	rp.AddModeHandler("dev", rp.DefaultHandler).
+		AddModeHandler("pro", rp.ReportURLHandler)
 
 	_ = rp.Mode("dev").SaveError(errors.New("nil return"), map[string]interface{}{
 		"api": "/xxx/yyy/",
 	})
 	_ = rp.Mode("dev").SaveError(errors.New("nil return"), nil)
 
-	go rp.Mode("pro").SaveError(errors.New("nil return"), map[string]interface{}{
+	go rp.SaveError(errors.New("nil return"), map[string]interface{}{
 		"api": "/xxx/yyy/",
 	})
-	go rp.Mode("pro").SaveError(errors.New("nil return"), nil)
+	go rp.SaveError(errors.New("nil return"), nil)
 	time.Sleep(10 * time.Second)
 }
 
 func TestReporter_JSONIndent_JSON(t *testing.T) {
-	rp := NewReporter()
+	rp := NewReporter("pro")
 
 	eUuid, buf, e := rp.JSON(NewFromString("nil return"), map[string]interface{}{
 		"api": "/xx/xxx/xx",
@@ -108,7 +109,7 @@ func TestNewReporterConcurrent(t *testing.T) {
 		serverStart <- 1
 	}()
 
-	rp := NewReporter()
+	rp := NewReporter("pro")
 	rp.AddURL("dev", "http://localhost:8196").
 		AddURL("pro", "http://localhost:7123")
 	rp.AddModeHandler("dev", DefaultHandler).
