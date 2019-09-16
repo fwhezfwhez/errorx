@@ -226,7 +226,13 @@ func TestMMM(t *testing.T) {
 	fmt.Println(NewWithAttach(NewFromString("hello"), "attach"))
 }
 
+
+
+
 func TestWrap(t *testing.T) {
-	e := fmt.Errorf("nil return")
-	fmt.Println(Wrap(Wrap(e)).Error())
+	fmt.Println(Wrap(tmp()).Error())
+}
+
+func tmp() error {
+	return Wrap(fmt.Errorf("nil return"))
 }
