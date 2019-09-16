@@ -201,7 +201,7 @@ func (e Error) StackTraceValue() string {
 // wrap an official error to Error type
 // function do the same as New()
 // New() or Wrap() depends on its semantics. mixing them is also correct.
-func wrap(e error) error {
+func Wrap(e error) error {
 	if e == nil {
 		return nil
 	}
@@ -393,9 +393,6 @@ func MustWrap(e error) Error {
 	return Empty()
 }
 
-func Wrap(e error) error {
-	return wrap(e)
-}
 
 func PrintStackFormat(flag int, file string, line int, cause string) string {
 	var formatGroup = make([]string, 0, 3)
