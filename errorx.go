@@ -244,6 +244,26 @@ func NewFromString(msg string) error {
 	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
 }
 
+func newFromStringWithDepth(msg string, depth int) error {
+	e := errors.New(msg)
+	switch v := e.(type) {
+	case Error:
+		_, file, line, _ := runtime.Caller(depth)
+		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
+		v.StackTraces = append(v.StackTraces, trace)
+		return v
+	case error:
+		errorX := Empty()
+		errorX.E = e
+		errorX.Errors = append(errorX.Errors, e)
+		_, file, line, _ := runtime.Caller(depth)
+		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
+		errorX.StackTraces = append(errorX.StackTraces, trace)
+		return errorX
+	}
+	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
+}
+
 // new an error from string with header
 func NewFromStringWithHeader(msg string, header map[string]interface{}) error {
 	er := NewFromString(msg).(Error)
@@ -278,7 +298,7 @@ func NewFromStringWithAttachf(format string, msg string, attach interface{}) err
 
 // new a error from a well format string
 func NewFromStringf(format string, msg ... interface{}) error {
-	return NewFromString(fmt.Sprintf(format, msg...))
+	return newFromStringWithDepth(fmt.Sprintf(format, msg...), 2)
 }
 
 // new a error from a error  with numeric params
@@ -392,7 +412,6 @@ func MustWrap(e error) Error {
 	}
 	return Empty()
 }
-
 
 func PrintStackFormat(flag int, file string, line int, cause string) string {
 	var formatGroup = make([]string, 0, 3)

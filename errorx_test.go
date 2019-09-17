@@ -230,9 +230,9 @@ func TestMMM(t *testing.T) {
 
 
 func TestWrap(t *testing.T) {
-	fmt.Println(Wrap(tmp()).Error())
+	fmt.Println(tmp().Error())
 }
 
 func tmp() error {
-	return Wrap(fmt.Errorf("nil return"))
+	return NewFromStringf("nil return")
 }
