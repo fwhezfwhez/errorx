@@ -13,6 +13,5 @@ before_install:
 script:
   - go build example/main.go
   - go test ./
-  - go test ./errorCollection
 notifications:
   email: false
