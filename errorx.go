@@ -29,6 +29,9 @@ const (
 // all stackTraces above.But in this case,'Error.E' only point to the origin one
 // It's ok to storage both official error and 'Error'
 type Error struct {
+	// Each wrap will add index 1
+	index int
+
 	// basic
 	E           error
 	StackTraces []string
@@ -76,6 +79,7 @@ func (e Error) GetHeader(key string) string {
 }
 func Empty() Error {
 	return Error{
+		index:       0,
 		E:           nil,
 		StackTraces: make([]string, 0, 30),
 		Context:     make(map[string]interface{}, 0),
@@ -89,9 +93,14 @@ func (e Error) Error() string {
 	var header = ""
 	if len(e.Header) != 0 {
 		buf, _ := json.MarshalIndent(e.Header, "  ", "  ")
-		header = fmt.Sprintf("header:\n%s\n", buf)
+		header += fmt.Sprintf("header:\n%s\n", buf)
 	}
 	rs := fmt.Sprintf("%s%s\n", header, e.StackTraceValue())
+
+	if len(e.Context) != 0 {
+		buf, _ := json.MarshalIndent(e.Context, "  ", "  ")
+		rs += fmt.Sprintf("context:\n%s\n", buf)
+	}
 	return rs
 }
 func (e Error) BasicError() string {
@@ -210,6 +219,7 @@ func Wrap(e error) error {
 		_, file, line, _ := runtime.Caller(1)
 		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
 		v.StackTraces = append(v.StackTraces, trace)
+		v.index ++
 		return v
 	case error:
 		errorX := Empty()
@@ -377,6 +387,43 @@ func NewFromStackTrace(stackTrace []string, msg string) error {
 	trace := PrintStackFormat(v.Flag, file, line, v.Error())
 	v.StackTraces = append(v.StackTraces, trace)
 	return v
+}
+
+func WrapContext(e error, ctx map[string]interface{}) error {
+	if e == nil {
+		return nil
+	}
+	switch v := e.(type) {
+	case Error:
+		_, file, line, _ := runtime.Caller(1)
+		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
+		v.StackTraces = append(v.StackTraces, trace)
+		if v.Context == nil || len(v.Context) == 0 {
+			v.Context = ctx
+		} else {
+			for i, va := range ctx {
+				_, ok := v.Context[i]
+				if !ok {
+					v.Context[i] = va
+				} else {
+					v.Context[fmt.Sprintf("%s_%d", i, v.index)] = va
+				}
+			}
+		}
+		return v
+	case error:
+		errorX := Empty()
+		errorX.E = e
+		errorX.Errors = append(errorX.Errors, e)
+		_, file, line, _ := runtime.Caller(1)
+		trace := PrintStackFormat(LdateTime|Llongfile|LcauseBy, file, line, v.Error())
+		errorX.StackTraces = append(errorX.StackTraces, trace)
+		if len(ctx) != 0 {
+			errorX.Context = ctx
+		}
+		return errorX
+	}
+	return Wrap(errors.New("invalid error type,error type should be official or errorx.Error"))
 }
 
 // ReGenerate a new error and save the old

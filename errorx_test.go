@@ -3,6 +3,7 @@ package errorx
 import (
 	"errors"
 	"fmt"
+	"github.com/fwhezfwhez/errorx"
 	"runtime/debug"
 	"testing"
 )
@@ -226,13 +227,21 @@ func TestMMM(t *testing.T) {
 	fmt.Println(NewWithAttach(NewFromString("hello"), "attach"))
 }
 
-
-
-
-func TestWrap(t *testing.T) {
+func TestWrapContext(t *testing.T) {
 	fmt.Println(tmp().Error())
 }
 
+func TestWrap(t *testing.T) {
+	fmt.Println(errorx.Wrap(tmpContext()).Error())
+}
+
 func tmp() error {
-	return NewFromStringf("nil return")
+	// return NewFromStringf("nil return")
+	return Wrap(tmpContext())
+}
+
+func tmpContext() error {
+	return WrapContext(fmt.Errorf("nil return"), map[string]interface{}{
+		"redis-url": "localhost:1111",
+	})
 }
