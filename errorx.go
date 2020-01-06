@@ -254,6 +254,26 @@ func NewFromString(msg string) error {
 	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
 }
 
+func NewFromStringWithDepth(msg string, depth int) error {
+	e := errors.New(msg)
+	switch v := e.(type) {
+	case Error:
+		_, file, line, _ := runtime.Caller(depth)
+		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
+		v.StackTraces = append(v.StackTraces, trace)
+		return v
+	case error:
+		errorX := Empty()
+		errorX.E = e
+		errorX.Errors = append(errorX.Errors, e)
+		_, file, line, _ := runtime.Caller(depth)
+		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
+		errorX.StackTraces = append(errorX.StackTraces, trace)
+		return errorX
+	}
+	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
+}
+
 func newFromStringWithDepth(msg string, depth int) error {
 	e := errors.New(msg)
 	switch v := e.(type) {
