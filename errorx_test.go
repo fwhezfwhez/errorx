@@ -3,7 +3,6 @@ package errorx
 import (
 	"errors"
 	"fmt"
-	"github.com/fwhezfwhez/errorx"
 	"runtime/debug"
 	"testing"
 )
@@ -232,7 +231,8 @@ func TestWrapContext(t *testing.T) {
 }
 
 func TestWrap(t *testing.T) {
-	fmt.Println(errorx.Wrap(tmpContext()).Error())
+	fmt.Println(tmpContext().Error())
+	fmt.Println(tmpWrap().Error())
 }
 
 func tmp() error {
@@ -243,5 +243,9 @@ func tmp() error {
 func tmpContext() error {
 	return WrapContext(fmt.Errorf("nil return"), map[string]interface{}{
 		"redis-url": "localhost:1111",
+		"name":      "errorx",
 	})
+}
+func tmpWrap() error{
+	return NewFromString("nil return")
 }
