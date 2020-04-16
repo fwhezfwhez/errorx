@@ -3,24 +3,30 @@ package errorx
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
+	"net/http"
 	"testing"
 	"time"
 )
 
 func startReportServer(port string) {
-	r := gin.Default()
-
-	r.POST("/", func(c *gin.Context) {
-		buf, e := ioutil.ReadAll(c.Request.Body)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		buf, e := ioutil.ReadAll(r.Body)
 		if e != nil {
 			fmt.Println(Wrap(e).Error())
 			return
 		}
 		fmt.Println("Recv:", string(buf))
+		w.WriteHeader(200)
+		w.Write([]byte("ok"))
 	})
-	r.Run(port)
+	server := &http.Server{
+		Addr:         port,
+		WriteTimeout: time.Second * 3, //设置3秒的写超时
+		Handler:      mux,
+	}
+	server.ListenAndServe()
 }
 
 func TestReporter(t *testing.T) {
@@ -116,7 +122,7 @@ func TestNewReporterConcurrent(t *testing.T) {
 		AddModeHandler("pro", rp.Mode("pro").ReportURLHandler)
 
 	<-serverStart
-	for i:=0;i<100;i++ {
+	for i := 0; i < 100; i++ {
 		go rp.Mode("dev").SaveError(errors.New("nil return"), map[string]interface{}{
 			"api": "/xxx/yyy/",
 		})
