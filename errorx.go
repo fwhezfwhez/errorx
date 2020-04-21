@@ -219,7 +219,7 @@ func Wrap(e error) error {
 		_, file, line, _ := runtime.Caller(1)
 		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
 		v.StackTraces = append(v.StackTraces, trace)
-		v.index ++
+		v.index++
 		return v
 	case error:
 		errorX := Empty()
@@ -327,12 +327,12 @@ func NewFromStringWithAttachf(format string, msg string, attach interface{}) err
 }
 
 // new a error from a well format string
-func NewFromStringf(format string, msg ... interface{}) error {
+func NewFromStringf(format string, msg ...interface{}) error {
 	return newFromStringWithDepth(fmt.Sprintf(format, msg...), 2)
 }
 
 // new a error from a error  with numeric params
-func NewWithParam(e error, params ... interface{}) error {
+func NewWithParam(e error, params ...interface{}) error {
 	if e == nil {
 		return nil
 	}
@@ -489,7 +489,7 @@ func PrintStackFormat(flag int, file string, line int, cause string) string {
 	}
 	if flag&Llongfile > 0 {
 		formatGroup = append(formatGroup, "%s")
-		trace := fmt.Sprintf("%s: %d", file, line)
+		trace := fmt.Sprintf("%s:%d", file, line)
 		formatArgs = append(formatArgs, trace)
 	}
 	if flag&LcauseBy > 0 {

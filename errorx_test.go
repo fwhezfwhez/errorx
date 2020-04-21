@@ -246,6 +246,6 @@ func tmpContext() error {
 		"name":      "errorx",
 	})
 }
-func tmpWrap() error{
+func tmpWrap() error {
 	return NewFromString("nil return")
 }
