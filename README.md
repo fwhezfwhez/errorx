@@ -13,8 +13,9 @@ a very convenient error handler.
 - [2. Start](#2-start)
 - [3. Module](#3-module)
     - [3.1 Error stacktrace](#31-error-stacktrace)
-    - [3.2 Error Report](#32-error-report)
-    - [3.3 JSON](#33-json)
+    - [3.2 Service error](#32-service-error)
+    - [3.3 Error Report](#33-error-report)
+    - [3.4 JSON](#34-json)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
