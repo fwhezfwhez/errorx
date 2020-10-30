@@ -19,8 +19,15 @@ func NewServiceError(errmsg string, errcode int) ServiceError {
 		Errmsg:  errmsg,
 	}
 }
-
-func IsServiceErr(src error, dest error) (ServiceError, bool) {
+func IsServiceErr(src error, dest ...error) (ServiceError, bool) {
+	for i, _ := range dest {
+		if se, ok := isServiceErr(src, dest[i]); ok {
+			return se, ok
+		}
+	}
+	return ServiceError{}, false
+}
+func isServiceErr(src error, dest error) (ServiceError, bool) {
 	if src == nil {
 		return ServiceError{}, false
 	}
