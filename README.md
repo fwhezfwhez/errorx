@@ -60,7 +60,7 @@ In most cases, client requires server to provide specific errmsg and errcode. Se
 func Control(c *gin.Context) {
 	e := Service()
 
-	if se, ok := IsServiceErr(e, balanceLackErr); ok {
+	if se, ok := errorx.IsServiceErr(e, balanceLackErr); ok {
 		c.JSON(200, gin.H{
 			"errcode": se.Errcode,
 			"errmsg": se.Errmsg,
