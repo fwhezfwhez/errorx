@@ -306,10 +306,12 @@ func ServiceToCash() error {
 	return nil
 }
 
-var balanceLackErr = NewServiceError("余额不足", 10001)
+var balanceLackErr = NewServiceError("balance not enough", 10001)
+var balanceLackErr2 = fmt.Errorf("balance not enough")
 
 func UtilToCash() error {
-	return balanceLackErr
+	// return balanceLackErr
+	return balanceLackErr2
 }
 
 func TestSE2(t *testing.T) {
