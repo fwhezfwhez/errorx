@@ -32,6 +32,8 @@ type Error struct {
 	// Each wrap will add index 1
 	index int
 
+	// core error // saves origin error
+
 	// basic
 	E           error
 	StackTraces []string
@@ -586,3 +588,28 @@ func ToString(arg interface{}) string {
 		return ""
 	}
 }
+
+func IsError(src error, dest error) (string, bool) {
+	if src == nil {
+		return "", false
+	}
+	if dest == nil {
+		return "", false
+	}
+
+	switch v := src.(type) {
+	case Error:
+		if v.E == nil {
+			return "", false
+		}
+		if v.E.Error() == dest.Error() {
+			return dest.Error(), true
+		}
+	case error:
+		if v.Error() == dest.Error() {
+			return dest.Error(), true
+		}
+	}
+	return "", false
+}
+

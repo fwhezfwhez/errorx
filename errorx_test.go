@@ -249,3 +249,69 @@ func tmpContext() error {
 func tmpWrap() error {
 	return NewFromString("nil return")
 }
+
+func TestE(t *testing.T) {
+	e1 := fmt.Errorf("password wrong")
+	layer1 := Wrap(e1)
+	layer2 := WrapContext(layer1, nil)
+	layer3 := Wrap(layer2)
+
+	if msg, is := IsError(layer3, e1); is {
+		fmt.Println("这是一个业务错误，需要返回给客户端提示", msg)
+		return
+	} else {
+		fmt.Println("这是一个栈错误，需要记录日志", layer3.Error())
+		return
+	}
+}
+
+func TestSE(t *testing.T) {
+	se := NewServiceError("balance not enough", 10041)
+	layer1 := Wrap(se)
+	layer2 := WrapContext(layer1, nil)
+	layer3 := Wrap(layer2)
+
+	if msg, is := IsServiceErr(layer3, se); is {
+		fmt.Printf("这是一个业务错误，需要返回给客户端提示, code: %d msg: %s\n", msg.Errcode, msg.Errmsg)
+		return
+	} else {
+		fmt.Println("这是一个栈错误，需要记录日志", layer3.Error())
+		return
+	}
+}
+
+func Control() {
+	e := ManyService()
+
+	if se, ok := IsServiceErr(e, balanceLackErr); ok {
+		fmt.Println(se.Errmsg, se.Errcode)
+		return
+	}
+	if e != nil {
+		fmt.Println(Wrap(e).Error())
+		return
+	}
+}
+
+func ManyService() error {
+	if e := ServiceToCash(); e != nil {
+		return Wrap(e)
+	}
+	return nil
+}
+func ServiceToCash() error {
+	if e := UtilToCash(); e != nil {
+		return WrapContext(Wrap(e), nil)
+	}
+	return nil
+}
+
+var balanceLackErr = NewServiceError("余额不足", 10001)
+
+func UtilToCash() error {
+	return balanceLackErr
+}
+
+func TestSE2(t *testing.T) {
+	Control()
+}

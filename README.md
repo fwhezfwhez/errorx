@@ -52,7 +52,60 @@ Output
 2019-08-30 17:51:42 | G:/go_workspace/GOPATH/src/test_X/tmp/main.go: 10 | nil return
 ```
 
-#### 3.2 Error Report
+#### 3.2 Service error
+In most cases, client requires server to provide specific errmsg and errcode. Service error is exact what you expects.
+
+```go
+func Control(c *gin.Context) {
+	e := Service()
+
+	if se, ok := IsServiceErr(e, balanceLackErr); ok {
+		c.JSON(200, gin.H{
+			"errcode": se.Errcode,
+			"errmsg": se.Errmsg,
+		})
+		return
+	}
+	if e != nil {
+		fmt.Println(Wrap(e).Error())
+        c.JSON(200, gin.H{
+            "errmsg": "unexpected error",
+            "errcode": -1,
+            "debug_message": errorx.Wrap(e).Error()
+        })
+		return
+	}
+	c.JSON(200, gin.H{"errcode":0})
+}
+
+
+func ManyService() error {
+	if e:= ServiceToCash();e!=nil {
+		return errorx.Wrap(e)
+	}
+	return nil
+}
+func ServiceToCash() error {
+	if e:=UtilToCash();e!=nil {
+		return errorx.Wrap(e)
+	}
+	return nil
+}
+
+var balanceLackErr = NewServiceError("balance not enough", 10001)
+
+func UtilToCash() error {
+	return balanceLackErr
+}
+
+```
+
+HTTP Response:
+```json
+{"errcode": 10001, "errmsg":"balance not enough"}
+```
+
+#### 3.3 Error Report
 
 **Using defaultHandler print in console**
 
@@ -172,7 +225,7 @@ Recv:
 }
 ```
 
-#### 3.3 JSON
+#### 3.4 JSON
 
 JSON and JSONIndent will generate a json buf from error and context.
 
