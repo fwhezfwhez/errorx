@@ -37,6 +37,9 @@ func isServiceErr(src error, dest error) (ServiceError, bool) {
 
 	destS, ok := dest.(ServiceError)
 	if !ok {
+		if isBasicErr(dest) {
+			return isServiceErr(src, NewServiceError(dest.Error(), 0))
+		}
 		return ServiceError{}, false
 	}
 
