@@ -283,7 +283,7 @@ func TestSE(t *testing.T) {
 func Control() {
 	e := ManyService()
 
-	if se, ok := IsServiceErr(fmt.Errorf("balance not enough"), balanceLackErr, balanceLackErr2); ok {
+	if se, ok := IsServiceErr(fmt.Errorf("balance not enough"), nil); ok {
 		fmt.Println(se.Errmsg, se.Errcode)
 		return
 	}
