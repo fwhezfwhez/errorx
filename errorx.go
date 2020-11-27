@@ -38,6 +38,10 @@ type Error struct {
 	E           error
 	StackTraces []string
 
+	isServiceErr   bool
+	serviceErrcode int
+	serviceErrmsg  string
+
 	// do not use context, it's tracking bug on development
 	Context map[string]interface{}
 	Header  map[string][]string
@@ -223,6 +227,17 @@ func Wrap(e error) error {
 		v.StackTraces = append(v.StackTraces, trace)
 		v.index++
 		return v
+	case ServiceError:
+		errorX := Empty()
+		errorX.E = e
+		errorX.isServiceErr = true
+		errorX.serviceErrcode = v.Errcode
+		errorX.serviceErrmsg = v.Errmsg
+		errorX.Errors = append(errorX.Errors, e)
+		_, file, line, _ := runtime.Caller(1)
+		trace := PrintStackFormat(LdateTime|Llongfile|LcauseBy, file, line, v.Error())
+		errorX.StackTraces = append(errorX.StackTraces, trace)
+		return errorX
 	case error:
 		errorX := Empty()
 		errorX.E = e
@@ -244,6 +259,17 @@ func NewFromString(msg string) error {
 		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
 		v.StackTraces = append(v.StackTraces, trace)
 		return v
+	case ServiceError:
+		errorX := Empty()
+		errorX.E = e
+		errorX.Errors = append(errorX.Errors, e)
+		_, file, line, _ := runtime.Caller(1)
+		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
+		errorX.StackTraces = append(errorX.StackTraces, trace)
+		errorX.isServiceErr = true
+		errorX.serviceErrcode = v.Errcode
+		errorX.serviceErrmsg = v.Errmsg
+		return errorX
 	case error:
 		errorX := Empty()
 		errorX.E = e
@@ -284,6 +310,17 @@ func newFromStringWithDepth(msg string, depth int) error {
 		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
 		v.StackTraces = append(v.StackTraces, trace)
 		return v
+	case ServiceError:
+		errorX := Empty()
+		errorX.E = e
+		errorX.Errors = append(errorX.Errors, e)
+		_, file, line, _ := runtime.Caller(depth)
+		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
+		errorX.StackTraces = append(errorX.StackTraces, trace)
+		errorX.isServiceErr = true
+		errorX.serviceErrcode = v.Errcode
+		errorX.serviceErrmsg = v.Errmsg
+		return errorX
 	case error:
 		errorX := Empty()
 		errorX.E = e
@@ -433,6 +470,20 @@ func WrapContext(e error, ctx map[string]interface{}) error {
 			}
 		}
 		return v
+	case ServiceError:
+		errorX := Empty()
+		errorX.E = e
+		errorX.Errors = append(errorX.Errors, e)
+		_, file, line, _ := runtime.Caller(1)
+		trace := PrintStackFormat(LdateTime|Llongfile|LcauseBy, file, line, v.Error())
+		errorX.StackTraces = append(errorX.StackTraces, trace)
+		if len(ctx) != 0 {
+			errorX.Context = ctx
+		}
+		errorX.isServiceErr = true
+		errorX.serviceErrcode = v.Errcode
+		errorX.serviceErrmsg = v.Errmsg
+		return errorX
 	case error:
 		errorX := Empty()
 		errorX.E = e
@@ -612,4 +663,3 @@ func IsError(src error, dest error) (string, bool) {
 	}
 	return "", false
 }
-

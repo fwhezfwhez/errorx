@@ -269,13 +269,12 @@ func TestSE(t *testing.T) {
 	se := NewServiceError("balance not enough", 10041)
 	layer1 := Wrap(se)
 	layer2 := WrapContext(layer1, nil)
-	layer3 := Wrap(layer2)
 
-	if msg, is := IsServiceErr(layer3, se); is {
+	if msg, is := IsServiceErr(layer2, se); is {
 		fmt.Printf("这是一个业务错误，需要返回给客户端提示, code: %d msg: %s\n", msg.Errcode, msg.Errmsg)
 		return
 	} else {
-		fmt.Println("这是一个栈错误，需要记录日志", layer3.Error())
+		fmt.Println("这是一个栈错误，需要记录日志", layer2.Error())
 		return
 	}
 }
