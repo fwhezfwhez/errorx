@@ -316,3 +316,18 @@ func UtilToCash() error {
 func TestSE2(t *testing.T) {
 	Control()
 }
+
+func TestSe(t *testing.T) {
+	//var e = NewServiceError("密码错误", 10)
+	var e = fmt.Errorf("pg dead")
+	wrape := Wrap(Wrap(Wrap(e)))
+	se, ok := IsServiceErr(wrape)
+
+	fmt.Println(ok)
+
+	if ok {
+		fmt.Println(se.Errmsg, se.Errcode)
+		return
+	}
+	fmt.Println("系统错误",e.Error())
+}
