@@ -20,10 +20,11 @@ const (
 // an Error instance wraps an official error and storage its stackTrace.
 // E and StackTraces work for the basic server
 // When tries to wrap the origin error to another, logic does like:
-//			if er := f(); er!=nil{
-//			    log.Println(er.Error())
-//				return errors.New("inner service error")
-//			}
+//
+//	if er := f(); er!=nil{
+//	    log.Println(er.Error())
+//		return errors.New("inner service error")
+//	}
 //
 // 'ReGenerated' should be set true and different errors should be saved in 'Errors',and the 'stackTrace' should include
 // all stackTraces above.But in this case,'Error.E' only point to the origin one
@@ -35,8 +36,9 @@ type Error struct {
 	// core error // saves origin error
 
 	// basic
-	E           error
-	StackTraces []string
+	E             error
+	StackTraces   []string
+	stackTracesV2 []stackline // 新版堆栈路径
 
 	isServiceErr   bool
 	serviceErrcode int
@@ -51,6 +53,30 @@ type Error struct {
 	Errors      []error
 	Flag        int
 	Keyword     string
+}
+
+func (e *Error) wrapStackLine(desc string) {
+
+	trace := stackDepth3()
+	if len(e.stackTracesV2) == 0 {
+		e.stackTracesV2 = make([]stackline, 0, 10)
+	}
+
+	e.stackTracesV2 = append([]stackline{{
+		trace: trace,
+		desc:  desc,
+	}}, e.stackTracesV2...)
+}
+
+func (e Error) Stack() []string {
+	var rs = make([]string, 0, 10)
+
+	for _, v := range e.stackTracesV2 {
+		tmp := fmt.Sprintf("%s %s", v.trace, v.desc)
+		rs = append(rs, tmp)
+	}
+
+	return rs
 }
 
 func (e Error) String() string {
@@ -84,14 +110,19 @@ func (e Error) GetHeader(key string) string {
 	return e.Header[key][0]
 }
 func Empty() Error {
+	return empty()
+}
+
+func empty() Error {
 	return Error{
-		index:       0,
-		E:           nil,
-		StackTraces: make([]string, 0, 30),
-		Context:     make(map[string]interface{}, 0),
-		ReGenerated: false,
-		Errors:      make([]error, 0, 30),
-		Flag:        Llongfile | LcauseBy | LdateTime,
+		index:         0,
+		E:             nil,
+		StackTraces:   make([]string, 0, 30),
+		stackTracesV2: make([]stackline, 0, 10),
+		Context:       make(map[string]interface{}, 0),
+		ReGenerated:   false,
+		Errors:        make([]error, 0, 30),
+		Flag:          Llongfile | LcauseBy | LdateTime,
 	}
 }
 
@@ -196,21 +227,15 @@ func (e Error) PrintStackTrace() string {
 }
 
 func (e Error) StackTraceValue() string {
-	//header := make([]string, 0, 10)
-	//if e.Flag&LdateTime > 0 {
-	//	header = append(header, "HappenAt")
-	//}
-	//if e.Flag&Llongfile > 0 {
-	//	header = append(header, "StackTrace")
-	//}
-	//if e.Flag&LcauseBy > 0 {
-	//	header = append(header, "CauseBy")
-	//}
-	//headerStr := strings.Join(header, " | ")
+
 	rs := make([]string, 0, len(e.StackTraces)+1)
-	// rs = append(rs, headerStr)
-	rs = append(rs, e.StackTraces...)
-	return strings.Join(rs, "\n")
+
+	for _, v := range e.stackTracesV2 {
+		tmp := fmt.Sprintf("%s %s", v.trace, v.desc)
+		rs = append(rs, tmp)
+	}
+
+	return strings.Join(rs, " | ")
 }
 
 // wrap an official error to Error type
@@ -222,9 +247,7 @@ func Wrap(e error) error {
 	}
 	switch v := e.(type) {
 	case Error:
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
-		v.StackTraces = append(v.StackTraces, trace)
+		v.wrapStackLine("")
 		v.index++
 		return v
 	case ServiceError:
@@ -233,53 +256,18 @@ func Wrap(e error) error {
 		errorX.isServiceErr = true
 		errorX.serviceErrcode = v.Errcode
 		errorX.serviceErrmsg = v.Errmsg
-		errorX.Errors = append(errorX.Errors, e)
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(LdateTime|Llongfile|LcauseBy, file, line, v.Error())
-		errorX.StackTraces = append(errorX.StackTraces, trace)
+
+		errorX.wrapStackLine(v.Errmsg)
 		return errorX
 	case error:
-		errorX := Empty()
+		errorX := empty()
 		errorX.E = e
 		errorX.Errors = append(errorX.Errors, e)
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(LdateTime|Llongfile|LcauseBy, file, line, v.Error())
-		errorX.StackTraces = append(errorX.StackTraces, trace)
+
+		errorX.wrapStackLine(e.Error())
 		return errorX
 	}
 	return Wrap(errors.New("invalid error type,error type should be official or errorx.Error"))
-}
-
-// new an error from string
-func NewFromString(msg string) error {
-	e := errors.New(msg)
-	switch v := e.(type) {
-	case Error:
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
-		v.StackTraces = append(v.StackTraces, trace)
-		return v
-	case ServiceError:
-		errorX := Empty()
-		errorX.E = e
-		errorX.Errors = append(errorX.Errors, e)
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
-		errorX.StackTraces = append(errorX.StackTraces, trace)
-		errorX.isServiceErr = true
-		errorX.serviceErrcode = v.Errcode
-		errorX.serviceErrmsg = v.Errmsg
-		return errorX
-	case error:
-		errorX := Empty()
-		errorX.E = e
-		errorX.Errors = append(errorX.Errors, e)
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
-		errorX.StackTraces = append(errorX.StackTraces, trace)
-		return errorX
-	}
-	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
 }
 
 func NewFromStringWithDepth(msg string, depth int) error {
@@ -290,37 +278,6 @@ func NewFromStringWithDepth(msg string, depth int) error {
 		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
 		v.StackTraces = append(v.StackTraces, trace)
 		return v
-	case error:
-		errorX := Empty()
-		errorX.E = e
-		errorX.Errors = append(errorX.Errors, e)
-		_, file, line, _ := runtime.Caller(depth)
-		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
-		errorX.StackTraces = append(errorX.StackTraces, trace)
-		return errorX
-	}
-	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
-}
-
-func newFromStringWithDepth(msg string, depth int) error {
-	e := errors.New(msg)
-	switch v := e.(type) {
-	case Error:
-		_, file, line, _ := runtime.Caller(depth)
-		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
-		v.StackTraces = append(v.StackTraces, trace)
-		return v
-	case ServiceError:
-		errorX := Empty()
-		errorX.E = e
-		errorX.Errors = append(errorX.Errors, e)
-		_, file, line, _ := runtime.Caller(depth)
-		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
-		errorX.StackTraces = append(errorX.StackTraces, trace)
-		errorX.isServiceErr = true
-		errorX.serviceErrcode = v.Errcode
-		errorX.serviceErrmsg = v.Errmsg
-		return errorX
 	case error:
 		errorX := Empty()
 		errorX.E = e
@@ -365,9 +322,36 @@ func NewFromStringWithAttachf(format string, msg string, attach interface{}) err
 	return er
 }
 
+// new an error from string
+func NewFromString(msg string) error {
+	v := empty()
+	v.wrapStackLine(msg)
+	return v
+}
+
 // new a error from a well format string
-func NewFromStringf(format string, msg ...interface{}) error {
-	return newFromStringWithDepth(fmt.Sprintf(format, msg...), 2)
+func NewFromStringf(format string, args ...interface{}) error {
+	v := findErr(args...)
+	v.wrapStackLine(fmt.Sprintf(format, args...))
+	return v
+}
+
+func findErr(args ...interface{}) Error {
+	var e Error
+	if len(args) > 0 {
+		for _, v := range args {
+			if tmp, ok := v.(Error); ok {
+				e = tmp
+				// 找到了底层错误，则返回该错误
+				return e
+			}
+		}
+
+		return empty()
+
+	}
+	return empty()
+
 }
 
 // new a error from a error  with numeric params
@@ -452,48 +436,33 @@ func WrapContext(e error, ctx map[string]interface{}) error {
 	if e == nil {
 		return nil
 	}
+
+	var infoparams = make([]string, 0, 10)
+	for k, v := range ctx {
+		argone := fmt.Sprintf("%s=%v", k, v)
+		infoparams = append(infoparams, argone)
+	}
+	ctxinfo := strings.Join(infoparams, " ")
+
 	switch v := e.(type) {
 	case Error:
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
-		v.StackTraces = append(v.StackTraces, trace)
-		if v.Context == nil || len(v.Context) == 0 {
-			v.Context = ctx
-		} else {
-			for i, va := range ctx {
-				_, ok := v.Context[i]
-				if !ok {
-					v.Context[i] = va
-				} else {
-					v.Context[fmt.Sprintf("%s_%d", i, v.index)] = va
-				}
-			}
-		}
+		v.wrapStackLine(ctxinfo)
+		v.index++
 		return v
 	case ServiceError:
 		errorX := Empty()
 		errorX.E = e
-		errorX.Errors = append(errorX.Errors, e)
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(LdateTime|Llongfile|LcauseBy, file, line, v.Error())
-		errorX.StackTraces = append(errorX.StackTraces, trace)
-		if len(ctx) != 0 {
-			errorX.Context = ctx
-		}
 		errorX.isServiceErr = true
 		errorX.serviceErrcode = v.Errcode
 		errorX.serviceErrmsg = v.Errmsg
+
+		errorX.wrapStackLine(fmt.Sprintf("errno=%d errmsg=%s %s", v.Errcode, v.Errmsg, ctxinfo))
 		return errorX
 	case error:
-		errorX := Empty()
+		errorX := empty()
 		errorX.E = e
 		errorX.Errors = append(errorX.Errors, e)
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(LdateTime|Llongfile|LcauseBy, file, line, v.Error())
-		errorX.StackTraces = append(errorX.StackTraces, trace)
-		if len(ctx) != 0 {
-			errorX.Context = ctx
-		}
+		errorX.wrapStackLine(fmt.Sprintf("%s %s", e.Error(), ctxinfo))
 		return errorX
 	}
 	return Wrap(errors.New("invalid error type,error type should be official or errorx.Error"))
@@ -531,25 +500,6 @@ func MustWrap(e error) Error {
 		return New(v).(Error)
 	}
 	return Empty()
-}
-
-func PrintStackFormat(flag int, file string, line int, cause string) string {
-	var formatGroup = make([]string, 0, 3)
-	var formatArgs = make([]interface{}, 0, 3)
-	if flag&LdateTime > 0 {
-		formatGroup = append(formatGroup, "%s")
-		formatArgs = append(formatArgs, time.Now().Format("2006-01-02 15:04:05"))
-	}
-	if flag&Llongfile > 0 {
-		formatGroup = append(formatGroup, "%s")
-		trace := fmt.Sprintf("%s:%d", file, line)
-		formatArgs = append(formatArgs, trace)
-	}
-	if flag&LcauseBy > 0 {
-		formatGroup = append(formatGroup, "%s")
-		formatArgs = append(formatArgs, cause)
-	}
-	return fmt.Sprintf(strings.Join(formatGroup, " | "), formatArgs...)
 }
 
 // generate an error key word.
