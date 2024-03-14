@@ -6,6 +6,12 @@ import (
 )
 
 func TestFormatCaller(t *testing.T) {
+	//fmt.Println(NewFromStringWithParam("hehehe", "a", 16, 9).Error())
+	//
+	//fmt.Println(GroupErrors(NewFromStringf("eeeee1"), fmt.Errorf("eeee2"), nil, Wrap(fmt.Errorf("eee3"))).Error())
+
+	fmt.Println(NewFromStackTrace([]string{"xx.go:15", "yy.go:16"}, "hehe").Error())
+
 	control()
 }
 
@@ -19,6 +25,8 @@ func control() {
 }
 
 func service() error {
+	return New(fmt.Errorf("aaa"))
+
 	e := serviceB()
 	return Wrap(e)
 }

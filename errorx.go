@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -18,7 +17,6 @@ const (
 )
 
 // an Error instance wraps an official error and storage its stackTrace.
-// E and StackTraces work for the basic server
 // When tries to wrap the origin error to another, logic does like:
 //
 //	if er := f(); er!=nil{
@@ -37,7 +35,7 @@ type Error struct {
 
 	// basic
 	E             error
-	StackTraces   []string
+	StackTraces   []string    // Deprecated,保留了字段防止外部应用直接使用引起无法编译问题
 	stackTracesV2 []stackline // 新版堆栈路径
 
 	isServiceErr   bool
@@ -58,6 +56,17 @@ type Error struct {
 func (e *Error) wrapStackLine(desc string) {
 
 	trace := stackDepth3()
+	if len(e.stackTracesV2) == 0 {
+		e.stackTracesV2 = make([]stackline, 0, 10)
+	}
+
+	e.stackTracesV2 = append([]stackline{{
+		trace: trace,
+		desc:  desc,
+	}}, e.stackTracesV2...)
+}
+
+func (e *Error) wrapStackLineWithTrace(trace string, desc string) {
 	if len(e.stackTracesV2) == 0 {
 		e.stackTracesV2 = make([]stackline, 0, 10)
 	}
@@ -149,11 +158,7 @@ func (e Error) BasicError() string {
 
 // return its stacktrace
 func (e Error) StackTrace() string {
-	rs := "\n"
-	for _, v := range e.StackTraces {
-		rs = rs + v + "\n"
-	}
-	return rs
+	return e.StackTraceValue()
 }
 
 // New an error with header info
@@ -185,50 +190,22 @@ func New(e error) error {
 	if e == nil {
 		return nil
 	}
-	switch v := e.(type) {
-	case Error:
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
-		v.StackTraces = append(v.StackTraces, trace)
-		return v
-	case error:
-		errorX := Empty()
-		errorX.E = e
-		errorX.Errors = append(errorX.Errors, e)
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
-		errorX.StackTraces = append(errorX.StackTraces, trace)
-		return errorX
-	}
-	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
 
+	tmp := empty()
+	tmp.wrapStackLine(e.Error())
+	return tmp
 }
 
 // print error stack trace
 // e.Flag only controls 'Error' type or official error which has been wrapped to 'Error'.
 // e.Flag only controls stack trace inner an Error type ,rather than some stack trace which has been init by api NewFromStackTrace([]string,string)
 func (e Error) PrintStackTrace() string {
-	//header := make([]string, 0, 10)
-	//if e.Flag&LdateTime > 0 {
-	//	header = append(header, "HappenAt")
-	//}
-	//if e.Flag&Llongfile > 0 {
-	//	header = append(header, "StackTrace")
-	//}
-	//if e.Flag&LcauseBy > 0 {
-	//	header = append(header, "CauseBy")
-	//}
-	//fmt.Println(strings.Join(header, " | "))
-
-	for _, v := range e.StackTraces {
-		fmt.Println(v)
-	}
-	return strings.Join(e.StackTraces, "\n")
+	return e.StackTraceValue()
 }
 
 func (e Error) StackTraceValue() string {
 
-	rs := make([]string, 0, len(e.StackTraces)+1)
+	rs := make([]string, 0, 10)
 
 	for _, v := range e.stackTracesV2 {
 		tmp := fmt.Sprintf("%s %s", v.trace, v.desc)
@@ -271,55 +248,67 @@ func Wrap(e error) error {
 }
 
 func NewFromStringWithDepth(msg string, depth int) error {
-	e := errors.New(msg)
-	switch v := e.(type) {
-	case Error:
-		_, file, line, _ := runtime.Caller(depth)
-		trace := PrintStackFormat(v.Flag, file, line, v.BasicError())
-		v.StackTraces = append(v.StackTraces, trace)
-		return v
-	case error:
-		errorX := Empty()
-		errorX.E = e
-		errorX.Errors = append(errorX.Errors, e)
-		_, file, line, _ := runtime.Caller(depth)
-		trace := PrintStackFormat(Llongfile|LcauseBy|LdateTime, file, line, v.Error())
-		errorX.StackTraces = append(errorX.StackTraces, trace)
-		return errorX
-	}
-	return New(errors.New("invalid error type,error type should be official or errorx.Error"))
+	e := empty()
+	e.wrapStackLine(msg)
+
+	return e
 }
 
 // new an error from string with header
 func NewFromStringWithHeader(msg string, header map[string]interface{}) error {
-	er := NewFromString(msg).(Error)
+	var tmp = make([]string, 0, 10)
+
 	for k, v := range header {
-		er.SetHeader(k, ToString(v))
+		pair := fmt.Sprintf("%s=%v", k, v)
+		tmp = append(tmp, pair)
 	}
-	return er
+
+	headerInfo := strings.Join(tmp, " ")
+
+	info := fmt.Sprintf("%s err=%s", headerInfo, msg)
+
+	e := empty()
+	e.wrapStackLine(info)
+
+	return e
 }
 
 // new a error from a well format string with header
 func NewFromStringWithHeaderf(format string, msg string, header map[string]interface{}) error {
-	er := NewFromStringf(format, msg).(Error)
+
+	var tmp = make([]string, 0, 10)
+
 	for k, v := range header {
-		er.SetHeader(k, ToString(v))
+		pair := fmt.Sprintf("%s=%v", k, v)
+		tmp = append(tmp, pair)
 	}
-	return er
+
+	headerInfo := strings.Join(tmp, " ")
+
+	info := fmt.Sprintf("%s err=%s", headerInfo, msg)
+
+	e := empty()
+	e.wrapStackLine(info)
+
+	return e
 }
 
-// new an error from string with header
+// Deprecated: using NewFromStringf
 func NewFromStringWithAttach(msg string, attach interface{}) error {
-	er := NewFromString(msg).(Error)
-	er.SetHeader("attach", ToString(attach))
-	return er
+	info := fmt.Sprintf("err=%s attach=%v", msg, attach)
+
+	e := empty()
+	e.wrapStackLine(info)
+	return e
 }
 
-// new an error from  well format string with header
+// Deprecated: using NewFromStringf
 func NewFromStringWithAttachf(format string, msg string, attach interface{}) error {
-	er := NewFromStringf(format, msg).(Error)
-	er.SetHeader("attach", ToString(attach))
-	return er
+	info := fmt.Sprintf("err=%s attach=%v", msg, attach)
+
+	e := empty()
+	e.wrapStackLine(info)
+	return e
 }
 
 // new an error from string
@@ -354,82 +343,84 @@ func findErr(args ...interface{}) Error {
 
 }
 
-// new a error from a error  with numeric params
+// Deprecated: using WrapContext
 func NewWithParam(e error, params ...interface{}) error {
 	if e == nil {
 		return nil
 	}
-
 	if len(params) == 0 {
-		return Wrap(e)
-	}
-	type ErrWithParam struct {
-		ErrMsg string      `json:"error"`
-		Params interface{} `json:"params"`
-	}
-	var errorMsg string
-	switch v := e.(type) {
-	case Error:
-		errorMsg = fmt.Sprintf("\n" + strings.Join(v.StackTraces, "\n"))
-	case error:
-		errorMsg = fmt.Sprintf(v.Error())
+		tmp := empty()
+		tmp.wrapStackLine(e.Error())
+
+		return tmp
 	}
 
-	// record param
-	ep := ErrWithParam{}
-	ep.ErrMsg = errorMsg
-	ep.Params = params
-	buf, _ := json.MarshalIndent(ep, "", "  ")
-	return NewFromString(fmt.Sprintf("%s", buf))
+	var infoarr = make([]string, 0, 10)
+	for i, v := range params {
+		pair := fmt.Sprintf("param%d=%v", i, v)
+		infoarr = append(infoarr, pair)
+	}
+
+	paraminfo := strings.Join(infoarr, " ")
+
+	tmp := empty()
+	tmp.wrapStackLine(fmt.Sprintf("%s %s", e.Error(), paraminfo))
+
+	return tmp
+
 }
 func NewFromStringWithParam(msg string, params ...interface{}) error {
 	if len(params) == 0 {
-		return NewFromString(msg)
+		tmp := empty()
+		tmp.wrapStackLine(msg)
+
+		return tmp
 	}
-	type ErrWithParam struct {
-		ErrMsg string      `json:"error"`
-		Params interface{} `json:"params"`
+
+	var infoarr = make([]string, 0, 10)
+	for i, v := range params {
+		pair := fmt.Sprintf("param%d=%v", i, v)
+		infoarr = append(infoarr, pair)
 	}
-	// record param
-	ep := ErrWithParam{}
-	ep.ErrMsg = msg
-	ep.Params = params
-	buf, _ := json.MarshalIndent(ep, "", "  ")
-	return NewFromString(fmt.Sprintf("%s", buf))
+
+	paraminfo := strings.Join(infoarr, " ")
+
+	tmp := empty()
+	tmp.wrapStackLine(fmt.Sprintf("%s %s", msg, paraminfo))
+
+	return tmp
 }
 
 // group series of error to a single error
-func GroupErrors(errors ...error) error {
-	var tmp error
-	var stackTrace = make([]string, 0, 10*len(errors))
-	stackTrace = append(stackTrace, "######## Get a bunch of errors ########")
-	defer func() {
-		stackTrace = append(stackTrace, "######## /Get a bunch of errors ########")
-	}()
+func GroupErrors(es ...error) error {
 
-	for i, e := range errors {
-		if e == nil {
+	tmp := empty()
+
+	infoarr := make([]string, 0, 10)
+	for i, v := range es {
+		if v == nil {
 			continue
 		}
-		tmp = New(e)
-		stackTrace = append(stackTrace, fmt.Sprintf("\n##### error_%d #####", i))
-		stackTrace = append(stackTrace, tmp.(Error).StackTraces...)
-		stackTrace = append(stackTrace, fmt.Sprintf("##### /error_%d #####", i))
+
+		pair := fmt.Sprintf("error_%d=%s", i, v.Error())
+
+		infoarr = append(infoarr, pair)
 	}
-	return NewFromStackTrace(stackTrace, "an error bunch")
+
+	tmp.wrapStackLine(fmt.Sprintf("Group Errors %s", strings.Join(infoarr, " ")))
+
+	return tmp
 }
 
 // new an error with existed stacktrace and generate the new error with new msg
 func NewFromStackTrace(stackTrace []string, msg string) error {
-	e := errors.New(msg)
-	v := Empty()
-	v.E = e
-	v.StackTraces = stackTrace
-	v.Errors = append(v.Errors, e)
-	_, file, line, _ := runtime.Caller(1)
-	trace := PrintStackFormat(v.Flag, file, line, v.Error())
-	v.StackTraces = append(v.StackTraces, trace)
-	return v
+	e := empty()
+
+	for _, v := range stackTrace {
+		e.wrapStackLineWithTrace(v, msg)
+	}
+
+	return e
 }
 
 func WrapContext(e error, ctx map[string]interface{}) error {
@@ -468,27 +459,9 @@ func WrapContext(e error, ctx map[string]interface{}) error {
 	return Wrap(errors.New("invalid error type,error type should be official or errorx.Error"))
 }
 
-// ReGenerate a new error and save the old
+// Decrecated
 func ReGen(old error, new error) error {
-	e := Empty()
-	e.E = old
-	e.ReGenerated = true
-
-	switch o := old.(type) {
-	case Error:
-		e = o
-		e.ReGenerated = true
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(e.Flag, file, line, new.Error())
-		e.StackTraces = append(e.StackTraces, trace)
-		e.Errors = append(e.Errors, old, new)
-	case error:
-		_, file, line, _ := runtime.Caller(1)
-		trace := PrintStackFormat(e.Flag, file, line, new.Error())
-		e.StackTraces = append(e.StackTraces, trace)
-		e.Errors = append(e.Errors, old, new)
-	}
-	return e
+	return new
 }
 
 // return an Error regardless of e's type
@@ -507,8 +480,11 @@ func MustWrap(e error) Error {
 // It's suggested to set unique(date, keyword), when error with same keyword in a day,database only saves field 'times'
 // rather than another error record
 func (e Error) GenerateKeyword() string {
-	arr := strings.Split((e).StackTraces[len(e.StackTraces)-1], "|")
-	core := strings.TrimSpace(arr[len(arr)-1])
+	arr := e.stackTracesV2
+	if len(arr) == 0 {
+		return "no stack"
+	}
+	core := strings.TrimSpace(arr[0].trace)
 	return generateKeyWord(core)
 }
 

@@ -1,11 +1,9 @@
 package errorCollection
 
 import (
-	"fmt"
 	"github.com/fwhezfwhez/errorx"
 	queue "github.com/fwhezfwhez/go-queue"
 	"log"
-	"strings"
 	"sync"
 	"time"
 )
@@ -70,7 +68,6 @@ func (ec *ErrorCollection) Add(e error) {
 		}
 	}()
 }
-
 
 // This is a self design  function to handle the inner errors collected via a single handler typed 'ErrorHandler'
 func (ec *ErrorCollection) Handle(f ErrorHandler) {
@@ -146,15 +143,15 @@ func (ec *ErrorCollection) IfErrorChanFull() bool {
 // How to make handler routine dependent?
 // ** When should do like this?**
 // ** When you realize the handler might risk timing out or**
-//	func LogEr() func(e error) {
-//		return func(e error) {
-//			go func(er error) {
-//				log.SetFlags(log.Llongfile | log.LstdFlags)
-//				log.Println(e.Error())
-//          }(e)
-//		}
-//	}
 //
+//		func LogEr() func(e error) {
+//			return func(e error) {
+//				go func(er error) {
+//					log.SetFlags(log.Llongfile | log.LstdFlags)
+//					log.Println(e.Error())
+//	         }(e)
+//			}
+//		}
 func (ec *ErrorCollection) HandleChain() {
 	ec.newAutoHandleChan()
 	ec.CatchError()
@@ -187,14 +184,14 @@ func (ec *ErrorCollection) HandleChain() {
 }
 
 // Add handler to handler chain
-func (ec *ErrorCollection) AddHandler(handler ... ErrorHandler) {
+func (ec *ErrorCollection) AddHandler(handler ...ErrorHandler) {
 	ec.M.Lock()
 	defer ec.M.Unlock()
 	ec.ErrorHandleChain = append(ec.ErrorHandleChain, handler...)
 }
 
 // Add handler with context to handler chain
-func (ec *ErrorCollection) AddHandlerWithContext(handler ... ErrorHandlerWithContextInSeries) {
+func (ec *ErrorCollection) AddHandlerWithContext(handler ...ErrorHandlerWithContextInSeries) {
 	ec.M.Lock()
 	defer ec.M.Unlock()
 	ec.ErrorHandleChainWithContextInSeires = append(ec.ErrorHandleChainWithContextInSeires, handler...)
@@ -270,12 +267,6 @@ func Logger() func(e error) {
 // Fmt
 func Fmt() func(e error) {
 	return func(e error) {
-		switch v := e.(type) {
-		case errorx.Error:
-			fmt.Println(strings.Join(v.StackTraces, "\n"))
-		default:
-			fmt.Println(v.Error())
-		}
 	}
 }
 
@@ -289,6 +280,6 @@ func Panic() func(e error) {
 				log.Println("panic and recover,because of:", r)
 			}
 		}()
-		 panic(e.Error())
+		panic(e.Error())
 	}
 }
