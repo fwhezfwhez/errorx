@@ -21,7 +21,8 @@ func NewServiceError(errmsg string, errcode int) ServiceError {
 }
 
 // IsServiceErr is used to handle service error.
-//  Case below will be regarded as service error and return se,true
+//
+//	Case below will be regarded as service error and return se,true
 func IsServiceErr(src error, dest ...error) (ServiceError, bool) {
 	if len(dest) == 0 {
 		se, ok := src.(ServiceError)
@@ -70,13 +71,19 @@ func isServiceErr(src error, dest error) (ServiceError, bool) {
 	}
 
 	switch v := src.(type) {
-	case Error:
-		return ServiceError{}, false
 	case ServiceError:
 		if v.Equal(destS) {
 			return destS, true
 		}
 		return v, false
+	case Error:
+		if v.E == nil {
+			return ServiceError{}, false
+		}
+		if v.E.Error() == dest.Error() {
+			return destS, true
+		}
+		return ServiceError{}, false
 	case error:
 		return ServiceError{}, false
 	}

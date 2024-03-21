@@ -192,6 +192,7 @@ func New(e error) error {
 	}
 
 	tmp := empty()
+	tmp.E = e
 	tmp.wrapStackLine(e.Error())
 	return tmp
 }
@@ -249,6 +250,7 @@ func Wrap(e error) error {
 
 func NewFromStringWithDepth(msg string, depth int) error {
 	e := empty()
+	e.E = fmt.Errorf("%s", msg)
 	e.wrapStackLine(msg)
 
 	return e
@@ -268,6 +270,7 @@ func NewFromStringWithHeader(msg string, header map[string]interface{}) error {
 	info := fmt.Sprintf("%s err=%s", headerInfo, msg)
 
 	e := empty()
+	e.E = fmt.Errorf("%s", msg)
 	e.wrapStackLine(info)
 
 	return e
@@ -288,6 +291,7 @@ func NewFromStringWithHeaderf(format string, msg string, header map[string]inter
 	info := fmt.Sprintf("%s err=%s", headerInfo, msg)
 
 	e := empty()
+	e.E = fmt.Errorf("%s", msg)
 	e.wrapStackLine(info)
 
 	return e
@@ -298,6 +302,7 @@ func NewFromStringWithAttach(msg string, attach interface{}) error {
 	info := fmt.Sprintf("err=%s attach=%v", msg, attach)
 
 	e := empty()
+	e.E = fmt.Errorf("%s", msg)
 	e.wrapStackLine(info)
 	return e
 }
@@ -307,6 +312,7 @@ func NewFromStringWithAttachf(format string, msg string, attach interface{}) err
 	info := fmt.Sprintf("err=%s attach=%v", msg, attach)
 
 	e := empty()
+	e.E = fmt.Errorf("%s", msg)
 	e.wrapStackLine(info)
 	return e
 }
@@ -314,6 +320,7 @@ func NewFromStringWithAttachf(format string, msg string, attach interface{}) err
 // new an error from string
 func NewFromString(msg string) error {
 	v := empty()
+	v.E = fmt.Errorf("%s", msg)
 	v.wrapStackLine(msg)
 	return v
 }
@@ -350,6 +357,7 @@ func NewWithParam(e error, params ...interface{}) error {
 	}
 	if len(params) == 0 {
 		tmp := empty()
+		tmp.E = e
 		tmp.wrapStackLine(e.Error())
 
 		return tmp
@@ -364,6 +372,7 @@ func NewWithParam(e error, params ...interface{}) error {
 	paraminfo := strings.Join(infoarr, " ")
 
 	tmp := empty()
+	tmp.E = e
 	tmp.wrapStackLine(fmt.Sprintf("%s %s", e.Error(), paraminfo))
 
 	return tmp
@@ -372,6 +381,7 @@ func NewWithParam(e error, params ...interface{}) error {
 func NewFromStringWithParam(msg string, params ...interface{}) error {
 	if len(params) == 0 {
 		tmp := empty()
+		tmp.E = fmt.Errorf("%s", msg)
 		tmp.wrapStackLine(msg)
 
 		return tmp
@@ -386,6 +396,7 @@ func NewFromStringWithParam(msg string, params ...interface{}) error {
 	paraminfo := strings.Join(infoarr, " ")
 
 	tmp := empty()
+	tmp.E = fmt.Errorf("%s", msg)
 	tmp.wrapStackLine(fmt.Sprintf("%s %s", msg, paraminfo))
 
 	return tmp
