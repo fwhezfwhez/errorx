@@ -71,9 +71,6 @@ func isServiceErr(src error, dest error) (ServiceError, bool) {
 
 	switch v := src.(type) {
 	case Error:
-		if v.E.Error() == dest.Error() {
-			return destS, true
-		}
 		return ServiceError{}, false
 	case ServiceError:
 		if v.Equal(destS) {
